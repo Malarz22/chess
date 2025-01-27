@@ -61,6 +61,7 @@ public class RightPanel extends JPanel {
         if (turn) {
             JLabel k = new JLabel("White turn");
             history.add(k);
+            history.updateUI();
             System.out.println("Białe");
             return;
         }

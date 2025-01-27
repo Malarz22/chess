@@ -5,12 +5,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Objects;
-import java.util.Vector;
-
 import static java.lang.Math.*;
 
 public class Board {
     //constants
+
     final static String[] piecesNames={"Rook", "Knight", "Bishop", "King", "Queen", "Bishop", "Knight", "Rook"};
     final static int boardSize =64;
     RightPanel right;
@@ -24,7 +23,7 @@ public class Board {
     int pointsWhite = 0;
     int pointsBlack = 0;
     int whiteKingPos=3;
-    int blackKingPos=58;
+    int blackKingPos=59;
     Board(){
         int row = 0;
         for (int column = 0; column < boardSize; column++) {
@@ -109,36 +108,69 @@ public class Board {
         for (int j = 0; j<possibleWays; j++)
         {
             int[] vector = vectors[j];
+            //possibleLen jest złe
+            int indexNow=index;
+            List checked = new List();
             for( int h = 0; h<possibleLen-1; h++) {
                 int b = abs(vector[1]);
                 int c = abs(vector[0]);
                 //zapobieganie dzieleniu przez 0
                 if(b==0) b=1;
                 if(c==0) c=1;
-                index+=vector[0]/c*8+vector[1]/b;
-                //System.out.println("index: "+index);
-                JPanel tym =(JPanel) boardSquares.getComponent(index);
-                if(!Objects.equals(tym.getComponent(CheckNumberOfComponents(tym)).getName(), "PlaceHolder")){
-                    System.out.println("Znaleziono przeszkode");
+                indexNow+=vector[0]/c*8+vector[1]/b;
+                if(indexNow>63 || indexNow<0 || (indexNow%8==0 && vector[1]==-1) || (indexNow%8==7 && vector[1]==1)) {
+                    //System.out.println("Koniec planszy");
                     break;
                 }
-                if(!Objects.equals(tym.getComponent(CheckNumberOfComponents(tym)).getName(), "King")){
-                    System.out.println("Szach");
-                    return true;
+                ////System.out.println("index: "+index);
+                JPanel tym =(JPanel) boardSquares.getComponent(indexNow);
+                if(!Objects.equals(tym.getComponent(CheckNumberOfComponents(tym)).getName(), "PlaceHolder")){
+                    //System.out.println("Znaleziono przeszkode");
+                    if(pieces[indexNow].color!=pieces[index].color) return true;
+                    break;
                 }
-
+                checked.add(String.valueOf(indexNow));
             }
         }
 
         int[][] vectors2 = {{1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1}};
         for (int[] ints : vectors2) {
-            if(index+ints[0]+ints[1]*8>63) continue;
-            int ind = index+ints[0]+ints[1]*8;
-            if(pieces[ind].name=="Knight" && pieces[index].color!=pieces[ind].color){
+            int indexNow=index+ints[0]*8+ints[1];
+            if(indexNow>63 || indexNow<0 || (indexNow%8==0 && ints[1]<=-1) || (indexNow%8==7 && ints[1]>=1)) continue;
+            if(pieces[indexNow].name=="Knight" && pieces[index].color!=pieces[indexNow].color){
+                System.out.println(indexNow);
                 return true;
             }
         }
         return false;
+    }
+
+    private void CheckBorder(int indexNow, int[] vector){
+        //muszę sprawdzać tutaj czy jego index wychodzi poza granice szachownicy
+        //Jak to zrobić?
+        //w przypadku skrajnych wierszy jest proste bo jeśli aktualny index jest <0 albo >63
+        //gorzej jest w przypadku kolumn
+        //w przypadku kolumn muszę sprawdzać czy aktualny index nie dzieli się przez 8
+        /*
+           1 2 3 4 5 6 7 8
+         1 _ _ _ _ _ _ _ _
+         2 x _ _ _ _ _ _ _
+         3 _ _ _ _ _ _ _ _
+         4 _ _ _ _ _ _ _ _
+         5 _ _ _ _ _ _ _ _
+         6 _ _ _ _ _ _ _ _
+         7 _ _ _ _ _ _ _ _
+         8 _ _ _ _ _ _ _ _
+           0  1  2  3  4  5  6  7
+           8  9  10 11 12 13 14 15
+           16 17 18 19 20 21 22 23
+           24 25 26 27 28 29 30 31
+           32 33 34 35 36 37 38 39
+           40 41 42 43 44 45 46 47
+           48 49 50 51 52 53 54 55
+           56 57 58 59 60 61 62 63
+         Jeśli jest w pierwszej kolumnie czyli dzieli się przez 8 muszę sprawdzić
+         */
     }
 
     private void UpdatePieces(int index1, int index2, Piece a){
@@ -216,7 +248,7 @@ public class Board {
         int i=piecesNames.length-1;
         int d=piecesNames.length/2;
         while (i>=d) {
-            System.out.println("i: " + i);
+            //System.out.println("i: " + i);
             JMenuItem nowy = new JMenuItem();
             Piece m = new Piece(piecesNames[i], color);
             JLabel p = new JLabel();
@@ -239,7 +271,7 @@ public class Board {
 
                 }
             });
-            System.out.println("added");
+            //System.out.println("added");
             menu.add(nowy);
             i+=-1;
         }
@@ -275,7 +307,7 @@ public class Board {
                             switch (previous.getName()) {
                                 case "King":
                                     int c;
-                                    System.out.println("vector" + vector[0] + vector[1]);
+                                    //System.out.println("vector" + vector[0] + vector[1]);
                                     //znalezienie rookindex
                                     if(vector[1]>0) {
                                         c = 2;
@@ -287,13 +319,14 @@ public class Board {
                                     if(tymczas.firstMove && abs(vector[1])==2 && Objects.equals(pieces[rookIndex].name, "Rook") && pieces[rookIndex].firstMove && !CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},abs(rookIndex-indexPrevious)-1)){
                                         now = Move("King", now);
                                         System.out.println("roszada");
-                                        System.out.println("Panel components");
+                                        //System.out.println("Panel components");
                                         for (int i=0;i<((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponentCount();i++){
                                             System.out.println(((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponent(i));
                                         }
                                         previous=(JLabel) ((JPanel) boardSquares.getComponent(rookIndex)).getComponent(1);
                                         now = (JLabel) ((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponent(1);
                                         now = Move("Rook", now);
+                                        turn=!turn;
                                         break;
                                     }
                                     if (len < 2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(pieces[indexNow].color, tymczas.color)) {
@@ -375,9 +408,15 @@ public class Board {
                                     if(tymczas.firstMove && abs(vector[1])==2 && pieces[rookIndex].name=="Rook" && pieces[rookIndex].firstMove && !CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious)){
                                         now = Move("King", now);
                                         System.out.println("roszada");
-                                        previous=(JLabel) ((JPanel) boardSquares.getComponent(rookIndex)).getComponent(0);
-                                        now = (JLabel) ((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponent(0);
+                                        //System.out.println("Panel components");
+                                        for (int i=0;i<((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponentCount();i++){
+                                            System.out.println(((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponent(i));
+                                        }
+                                        previous=(JLabel) ((JPanel) boardSquares.getComponent(rookIndex)).getComponent(1);
+                                        now = (JLabel) ((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponent(1);
                                         now = Move("Rook", now);
+                                        turn=!turn;
+                                        break;
                                     }
                                     if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(pieces[indexNow].color, tymczas.color)){
                                         now = Move("King", now);
@@ -441,6 +480,7 @@ public class Board {
                             }
                         }
                     }
+                    right.ShowTurn(turn);
 
 
                     //System.out.println("pieces [indexNow] "+ pieces[indexNow]);

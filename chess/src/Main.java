@@ -15,6 +15,7 @@ public class Main{
         frame.setSize(1360,768);
         //frame.add(order);
         RightPanel boczny = new RightPanel();
+        plansza.getRightPanel(boczny);
         boczny.setBackground(Color.BLACK);
         JPanel wszystko = new JPanel();
         JPanel planszaPanel = plansza.boardSquares;

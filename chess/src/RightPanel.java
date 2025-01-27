@@ -6,7 +6,7 @@ import java.beans.PropertyChangeListener;
 public class RightPanel extends JPanel {
     JButton nowaGra = new JButton("New Game");
     JLabel history = new JLabel(new ImageIcon("wood.jpg"));
-
+    List movesHistory = new List();
     RightPanel(){
         JPanel buttonContainer = new JPanel();
         nowaGra.addActionListener(new Action() {
@@ -61,8 +61,15 @@ public class RightPanel extends JPanel {
         if (turn) {
             JLabel k = new JLabel("White turn");
             history.add(k);
+            System.out.println("Białe");
+            return;
         }
-        JLabel k = new JLabel("White turn");
+        JLabel k = new JLabel("Black turn");
+        System.out.println("czarne");
         history.add(k);
+    }
+
+    public void AddToHistory(){
+        movesHistory.add("ruch");
     }
 }

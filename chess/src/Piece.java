@@ -10,7 +10,7 @@ public abstract class Piece {
     String color;
     String name;
     int points;
-    boolean firstMove;
+    int move;
 
     //boolean firstMove=true;
     // Visualization of the possibilities array:
@@ -43,7 +43,7 @@ public abstract class Piece {
         this.points = points;
         this.look = new ImageIcon(imagePath);
         this.pack = new JLabel(look, SwingConstants.CENTER);
-        this.firstMove = true;
+        this.move = 1;
     }
     ;
 /*    Piece(String Name,String Color){

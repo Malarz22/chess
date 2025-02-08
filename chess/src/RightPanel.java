@@ -3,6 +3,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RightPanel extends JPanel {
     JButton nowaGra = new JButton("New Game");
@@ -10,7 +12,7 @@ public class RightPanel extends JPanel {
 
     BoxLayout boxLayout = new BoxLayout(historyPanel, BoxLayout.Y_AXIS);
     JLabel turnLabel = new JLabel();
-    List movesHistory = new List();
+    List<String> movesHistory = new ArrayList<String>();
     RightPanel(Board b, JPanel boardPanel){
         historyPanel.setLayout(boxLayout);
         JPanel buttonContainer = new JPanel();

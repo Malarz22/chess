@@ -257,7 +257,7 @@ public class Board {
                                     int rookIndex=indexPrevious+vector[1]+c;
                                     //System.out.format("King %b, %b, %b, %b, %b " , tymczas.firstMove , abs(vector[1])==2, manager.pieces[rookIndex].name=="Rook",  manager.pieces[ rookIndex].firstMove, !CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious));
 
-                                    if(tymczas.firstMove && abs(vector[1])==2 && manager.pieces[rookIndex].name=="Rook" && manager.pieces[rookIndex].firstMove && !manager.CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious)){
+                                    if(tymczas.move==1 && abs(vector[1])==2 && manager.pieces[rookIndex].name=="Rook" && manager.pieces[rookIndex].move == 1 && !manager.CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious)){
                                         now = manager.Move("King", now);
                                         System.out.println("roszada");
                                         //System.out.println("Panel components");
@@ -312,13 +312,20 @@ public class Board {
                                     break;
                                 case "Pawn":
                                     if(previousRow==4 && nowRow==5 && abs(nowColumn-previousColumn)==1){
-                                        System.out.println("En pasannt");
-                                        vector = new int[]{nowRow-previousRow-1,nowColumn-1-previousColumn};
-                                        int pawnIndex = nowColumn-1+previousRow;
-                                        if(!manager.CheckObstacle(indexPrevious,vector,1)){
-                                            System.out.println("En pasannt");
+                                        int pawnIndex = indexNow-8;
+                                        int tymRow = indexNow / 8;
+                                        int tymCol = indexNow % 8;
+                                        vector = new int[]{tymRow-previousRow,tymCol-previousColumn};
+                                        Pawn taken = (Pawn) manager.pieces[pawnIndex];
+                                        String rightMove = String.format("%s%d%s%d",GetColumn(tymCol),tymRow+2,GetColumn(tymCol),tymRow);
+                                        if(taken.startingColumn == GetColumn(tymCol) && taken.move == 2 && right.movesHistory.getLast().equals(rightMove)) {
                                             now = manager.Move("Pawn", now);
+                                            manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            manager.pieces[pawnIndex] = new PlaceHolder();
+                                            JLabel tym = (JLabel) boardSquares.getComponent(pawnIndex).getComponentAt(1, 1);
+                                            tym = manager.Move("PlaceHolder", tym);
                                             move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            manager.turn = !manager.turn;
                                         }
                                     }
                                     if(nowRow==7){
@@ -327,21 +334,22 @@ public class Board {
                                         menuNow.show(nowSquare,0,0);
                                     }
                                     //System.out.println("Vector: " + vector[0] + " " + vector[1]);System.out.println("Jestem: " + manager.pieces[indexNow].color + " drugi " + manager.pieces[indexPrevious].color + " tymczas: " + tymczas.color + " now " + nowPiece.color);
-                                    if (vector[0] != 0 && vector[1] == 0 && (len==1 || (tymczas.firstMove && len==2)) && !manager.CheckObstacle(indexPrevious, vector, len+1)) {
+                                    if (vector[0] != 0 && vector[1] == 0 && (len==1 || (tymczas.move == 1 && len==2)) && !manager.CheckObstacle(indexPrevious, vector, len+1)) {
                                         now = manager.Move("Pawn", now);
                                         move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
-                                        tymczas.firstMove=false;
+                                        tymczas.move +=1;
                                     } else if (Diagonal(vector) && len < 2 && !Objects.equals(nowPiece.name, "PlaceHolder") && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
                                         if (manager.CheckObstacle(indexPrevious, vector, 2)) {
                                             now = manager.Move("Pawn", now);
-                                            tymczas.firstMove=false;
+                                            tymczas.move +=1;
                                         }
                                         move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
                                     }
                                     break;
                                 default:
                             }
-                            
+                            right.ShowTurn(manager.turn);
+                            right.AddToHistory(move);
                         }
 
                     }
@@ -358,7 +366,7 @@ public class Board {
                                     int rookIndex=indexPrevious+vector[1]+c;
                                     //System.out.format("King %b, %b, %b, %b, %b " , tymczas.firstMove , abs(vector[1])==2, manager.pieces[rookIndex].name=="Rook",  manager.pieces[ rookIndex].firstMove, !CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious));
 
-                                    if(tymczas.firstMove && abs(vector[1])==2 && manager.pieces[rookIndex].name=="Rook" && manager.pieces[rookIndex].firstMove && !manager.CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious)){
+                                    if(tymczas.move == 1 && abs(vector[1])==2 && manager.pieces[rookIndex].name=="Rook" && manager.pieces[rookIndex].move == 1 && !manager.CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious)){
                                         now = manager.Move("King", now);
                                         System.out.println("roszada");
                                         //System.out.println("Panel components");
@@ -411,8 +419,27 @@ public class Board {
                                     }
                                     break;
                                 case "Pawn":
-                                    if (nowRow==5){
-                                        // trzeba sprawdzić czy w history moves jest ruch o dwa 
+                                    if(previousRow==3 && nowRow==2 && abs(nowColumn-previousColumn)==1){
+                                        System.out.println("Jestem");
+                                        int pawnIndex = indexNow+8;
+                                        int tymRow = indexNow / 8;
+                                        int tymCol = indexNow % 8;
+                                        vector = new int[]{tymRow-previousRow,tymCol-previousColumn};
+                                        Pawn taken = (Pawn) manager.pieces[pawnIndex];
+                                        String rightMove = String.format("%s%d%s%d",GetColumn(tymCol),tymRow,GetColumn(tymCol),tymRow+2);
+                                        System.out.println(taken.startingColumn == GetColumn(tymCol));
+                                        System.out.println(taken.move == 2);
+                                        System.out.println(right.movesHistory.getLast());
+                                        System.out.println(rightMove);
+                                        if(taken.startingColumn == GetColumn(tymCol) && taken.move == 2 && right.movesHistory.getLast().equals(rightMove)) {
+                                            now = manager.Move("Pawn", now);
+                                            manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            manager.pieces[pawnIndex] = new PlaceHolder();
+                                            JLabel tym = (JLabel) boardSquares.getComponent(pawnIndex).getComponentAt(1, 1);
+                                            tym = manager.Move("PlaceHolder", tym);
+                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            manager.turn = !manager.turn;
+                                        }
                                     }
                                     if(nowRow==0){
                                         JPopupMenu menuNow = (JPopupMenu) nowSquare.getComponent(0);
@@ -420,25 +447,27 @@ public class Board {
                                         menuNow.show(nowSquare,0,0);
                                     }
                                     //System.out.println("Vector: " + vector[0] + " " + vector[1]);System.out.println("Jestem: " + manager.pieces[indexNow].color + " drugi " + manager.pieces[indexPrevious].color + " tymczas: " + tymczas.color + " now " + nowPiece.color);
-                                    if(vector[0]!=0&&vector[1]==0 && (len==1 || (tymczas.firstMove && len==2)) && !manager.CheckObstacle(indexPrevious,vector,len+1)){
+                                    if(vector[0]!=0&&vector[1]==0 && (len==1 || (tymczas.move == 1 && len==2)) && !manager.CheckObstacle(indexPrevious,vector,len+1)){
                                         now = manager.Move("Pawn",now);
                                         move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
-                                        tymczas.firstMove=false;
+                                        tymczas.move += 1;
                                     }
                                     else if(Diagonal(vector) && len<2 && !Objects.equals(nowPiece.name, "PlaceHolder") && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
                                         if(manager.CheckObstacle(indexPrevious,vector,2)){
                                             now = manager.Move("Pawn",now);
-                                            tymczas.firstMove=false;
+                                            tymczas.move +=1;
                                         }
                                         move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                     }
                                     break;
                                 default:
                             }
+                            right.ShowTurn(manager.turn);
+                            right.AddToHistory(move);
                         }
+
                     }
-                    right.ShowTurn(manager.turn);
-                    right.AddToHistory(move);
+
 
                     //System.out.println("manager.pieces [indexNow] "+ manager.pieces[indexNow]);
                     //System.out.println("manager.pieces [indexPrevious] " + manager.pieces[indexPrevious]);

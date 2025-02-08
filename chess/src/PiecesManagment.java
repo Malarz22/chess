@@ -72,14 +72,18 @@ public class PiecesManagment  {
         previous.setIcon(new ImageIcon("chess/pieces/placehHolder.png"));
         now.setIcon(piece);
         previous.setName("PlaceHolder");
+
         now.setName(name);
         turn=!turn;
         return now;
     }
 
-    public void UpdatePieces(int index1, int index2, Piece a){
-        pieces[index1] = new Piece();
+    public String UpdatePieces(int index1, int index2, Piece a){
+        String move = board.GetCoordinates(index1);
+        move += board.GetCoordinates(index2);
+        pieces[index1] = new PlaceHolder();
         pieces[index2] = a;
+        return move;
     }
 
 

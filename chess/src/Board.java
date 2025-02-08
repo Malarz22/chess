@@ -24,74 +24,7 @@ public class Board {
     int whiteKingPos=3;
     int blackKingPos=59;
     Board(){
-        int row = 0;
-        manager = new PiecesManagment(this);
-        for (int column = 0; column < boardSize; column++) {
-            boolean added = false;
-            if (column % 8 == 0) row += 1;
-            JPanel square = new JPanel();
-            square.setName(String.valueOf(column));
-            square.setLayout(new GridBagLayout()); // Center components in the square
-
-            JLabel piece;
-
-            if (column < 8) {
-                Piece a = new Piece(piecesNames[column], "White");
-                manager.pieces[column] = a;
-                piece = a.pack;
-                piece.setName(piecesNames[column]);
-                square.add(PromotionMenu("Black"),0);
-                square.add(piece);
-                added = true;
-            } else if (column < 16) {
-                Piece a = new Piece("Pawn", "White");
-                manager.pieces[column] = a;
-                piece = a.pack;
-                
-                piece.setName("Pawn");
-                square.add(piece);
-                added = true;
-            } else if (column >= 48 && column < 56) {
-                Piece a = new Piece("Pawn", "Black");
-                manager.pieces[column] = a;
-                piece = a.pack;
-                piece.setName("Pawn");
-                
-                square.add(piece);
-                added = true;
-            } else if (column >= 56) {
-                Piece a = new Piece(piecesNames[column - 56], "Black");
-                manager.pieces[column] = a;
-                piece = a.pack;
-                piece.setName(piecesNames[column - 56]);
-                square.add(PromotionMenu("White"),0);
-                square.add(piece);
-                added = true;
-            } else {
-                piece = new JLabel(new ImageIcon("chess/pieces/placehHolder.png"));
-                manager.pieces[column]= new Piece();
-                square.add(piece);
-                piece.setName("PlaceHolder");
-            }
-
-            if (column % 2 == 0) {
-                if (row % 2 == 0)
-                    square.setBackground(new Color(139, 69, 19));
-                else
-                    square.setBackground(new Color(245, 222, 179));
-            }
-            else {
-                if (row % 2 == 0)
-                    square.setBackground(new Color(245, 222, 179));
-                else
-                    square.setBackground(new Color(139, 69, 19));
-            }
-            piece.addMouseListener(myMouse);
-
-            boardSquares.add(square,column);
-
-
-        }
+       SetUpBoard();
     }
 
 /*
@@ -147,7 +80,28 @@ public class Board {
         //System.out.format("Wysokość każdego pola: %d Długość każdego pola: %d %n",(int)RowsX,(int)ColY);
     }
 
+    public String GetCoordinates(int index){
+        String coordinates = "";
+        int col = index%8;
+        int row = index/8+1;
+        coordinates+=GetColumn(col);
+        coordinates+=Integer.toString(row);
+        return coordinates;
+    }
 
+    private String GetColumn(int col){
+        return switch (col) {
+            case 0 -> "a";
+            case 1 -> "b";
+            case 2 -> "c";
+            case 3 -> "d";
+            case 4 -> "e";
+            case 5 -> "f";
+            case 6 -> "g";
+            case 7 -> "h";
+            default -> "";
+        };
+    }
 
     public void getRightPanel(RightPanel a){
         right=a;
@@ -160,7 +114,7 @@ public class Board {
         while (i>=d) {
             //System.out.println("i: " + i);
             JMenuItem nowy = new JMenuItem();
-            Piece m = new Piece(piecesNames[i], color);
+            Piece m = createPiece(piecesNames[i], color);
             JLabel p = new JLabel();
             p.setIcon(m.look);
             p.setName(m.name);
@@ -173,12 +127,6 @@ public class Board {
                     manager.previous.setIcon(c.getIcon());
                     manager.turn=!manager.turn;
                     manager.Move(manager.previous.getName(),manager.previous);
-//                    JPopupMenu menu = (JPopupMenu) nowy.getParent();
-//                    JPanel square = (JPanel) menu.getParent();
-//                    JLabel piece = (JLabel) square.getComponent(1);
-//                    piece.setName(c.getName());
-//                    piece.setIcon(c.getIcon());
-
                 }
             });
             //System.out.println("added");
@@ -186,6 +134,90 @@ public class Board {
             i+=-1;
         }
         return menu;
+    }
+
+    public void SetUpBoard(){
+        int row = 0;
+        manager = new PiecesManagment(this);
+        boardSquares = new JPanel(new GridLayout(8,8));
+        for (int column = 0; column < boardSize; column++) {
+            boolean added = false;
+            if (column % 8 == 0) row += 1;
+            JPanel square = new JPanel();
+            square.setName(String.valueOf(column));
+            square.setLayout(new GridBagLayout()); // Center components in the square
+
+            JLabel piece;
+
+            if (column < 8) {
+                Piece a = createPiece(piecesNames[column], "White");
+                manager.pieces[column] = a;
+                piece = a.pack;
+                piece.setName(piecesNames[column]);
+                square.add(PromotionMenu("Black"),0);
+                square.add(piece);
+                added = true;
+            } else if (column < 16) {
+                Piece a = new Pawn("White",GetColumn(column%8));
+                manager.pieces[column] = a;
+                piece = a.pack;
+
+                piece.setName("Pawn");
+                square.add(piece);
+                added = true;
+            } else if (column >= 48 && column < 56) {
+                Piece a = new Pawn("Black",GetColumn(column%8));;
+                manager.pieces[column] = a;
+                piece = a.pack;
+                piece.setName("Pawn");
+
+                square.add(piece);
+                added = true;
+            } else if (column >= 56) {
+                Piece a = createPiece(piecesNames[column-56], "Black");
+                manager.pieces[column] = a;
+                piece = a.pack;
+                piece.setName(piecesNames[column - 56]);
+                square.add(PromotionMenu("White"),0);
+                square.add(piece);
+                added = true;
+            } else {
+                piece = new JLabel(new ImageIcon("chess/pieces/placehHolder.png"));
+                manager.pieces[column]= new PlaceHolder();
+                square.add(piece);
+                piece.setName("PlaceHolder");
+            }
+
+            if (column % 2 == 0) {
+                if (row % 2 == 0)
+                    square.setBackground(new Color(139, 69, 19));
+                else
+                    square.setBackground(new Color(245, 222, 179));
+            }
+            else {
+                if (row % 2 == 0)
+                    square.setBackground(new Color(245, 222, 179));
+                else
+                    square.setBackground(new Color(139, 69, 19));
+            }
+            piece.addMouseListener(myMouse);
+
+            boardSquares.add(square,column);
+
+
+        }
+
+    }
+
+    private Piece createPiece(String name, String color) {
+        switch (name) {
+            case "King": return new King(color);
+            case "Queen": return new Queen(color);
+            case "Bishop": return new Bishop(color);
+            case "Knight": return new Knight(color);
+            case "Rook": return new Rook(color);
+            default: return null;
+        }
     }
 
     MouseAdapter myMouse = new MouseAdapter() {
@@ -211,14 +243,13 @@ public class Board {
 
                     Piece tymczas = manager.pieces[indexPrevious];
                     Piece nowPiece = manager.pieces[indexNow];
+                    String move="";
                     if (manager.turn) {
                         if (Objects.equals(tymczas.color, "White")) {
                             if(manager.CheckCheck(whiteKingPos)) System.out.println("Szach na białych");
                             switch (manager.previous.getName()) {
                                 case "King":
                                     int c;
-                                    //System.out.println("vector" + vector[0] + vector[1]);
-                                    //znalezienie rookindex
                                     if(vector[1]>0) {
                                         c = 2;
                                     }
@@ -226,7 +257,7 @@ public class Board {
                                     int rookIndex=indexPrevious+vector[1]+c;
                                     //System.out.format("King %b, %b, %b, %b, %b " , tymczas.firstMove , abs(vector[1])==2, manager.pieces[rookIndex].name=="Rook",  manager.pieces[ rookIndex].firstMove, !CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious));
 
-                                    if(tymczas.firstMove && abs(vector[1])==2 && Objects.equals(manager.pieces[rookIndex].name, "Rook") && manager.pieces[rookIndex].firstMove && !manager.CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},abs(rookIndex-indexPrevious)-1)){
+                                    if(tymczas.firstMove && abs(vector[1])==2 && manager.pieces[rookIndex].name=="Rook" && manager.pieces[rookIndex].firstMove && !manager.CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious)){
                                         now = manager.Move("King", now);
                                         System.out.println("roszada");
                                         //System.out.println("Panel components");
@@ -237,18 +268,19 @@ public class Board {
                                         now = (JLabel) ((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponent(1);
                                         now = manager.Move("Rook", now);
                                         manager.turn=!manager.turn;
+                                        move+="roszada";
                                         break;
                                     }
-                                    if (len < 2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
+                                    if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
                                         now = manager.Move("King", now);
-                                        manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                        move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                     }
                                     break;
                                 case "Queen":
                                     if (Diagonal(vector) || Strait(vector)) {
                                         if (!manager.CheckObstacle(indexPrevious, vector, len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
                                             now = manager.Move("Queen", now);
-                                            manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
 
                                         }
                                     }
@@ -257,7 +289,7 @@ public class Board {
                                     if (Diagonal(vector)) {
                                         if (!manager.CheckObstacle(indexPrevious, vector, len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
                                             now = manager.Move("Bishop", now);
-                                            manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
                                         }
                                     }
                                     break;
@@ -266,7 +298,7 @@ public class Board {
                                     for (int[] ints : vectors) {
                                         if (vector[0] == ints[0] && vector[1] == ints[1] && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
                                             now = manager.Move("Knight", now);
-                                            manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
                                         }
                                     }
                                     break;
@@ -274,11 +306,21 @@ public class Board {
                                     if (Strait(vector)) {
                                         if (!manager.CheckObstacle(indexPrevious, vector, len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
                                             now = manager.Move("Rook", now);
-                                            manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
                                         }
                                     }
                                     break;
                                 case "Pawn":
+                                    if(previousRow==4 && nowRow==5 && abs(nowColumn-previousColumn)==1){
+                                        System.out.println("En pasannt");
+                                        vector = new int[]{nowRow-previousRow-1,nowColumn-1-previousColumn};
+                                        int pawnIndex = nowColumn-1+previousRow;
+                                        if(!manager.CheckObstacle(indexPrevious,vector,1)){
+                                            System.out.println("En pasannt");
+                                            now = manager.Move("Pawn", now);
+                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                        }
+                                    }
                                     if(nowRow==7){
                                         JPopupMenu menuNow = (JPopupMenu) nowSquare.getComponent(0);
                                         menuNow.setPopupSize(100,400);
@@ -287,18 +329,19 @@ public class Board {
                                     //System.out.println("Vector: " + vector[0] + " " + vector[1]);System.out.println("Jestem: " + manager.pieces[indexNow].color + " drugi " + manager.pieces[indexPrevious].color + " tymczas: " + tymczas.color + " now " + nowPiece.color);
                                     if (vector[0] != 0 && vector[1] == 0 && (len==1 || (tymczas.firstMove && len==2)) && !manager.CheckObstacle(indexPrevious, vector, len+1)) {
                                         now = manager.Move("Pawn", now);
-                                        manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                        move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
                                         tymczas.firstMove=false;
                                     } else if (Diagonal(vector) && len < 2 && !Objects.equals(nowPiece.name, "PlaceHolder") && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
                                         if (manager.CheckObstacle(indexPrevious, vector, 2)) {
                                             now = manager.Move("Pawn", now);
                                             tymczas.firstMove=false;
                                         }
-                                        manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                        move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
                                     }
                                     break;
                                 default:
                             }
+                            
                         }
 
                     }
@@ -326,18 +369,19 @@ public class Board {
                                         now = (JLabel) ((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponent(1);
                                         now = manager.Move("Rook", now);
                                         manager.turn=!manager.turn;
+                                        move+="roszada";
                                         break;
                                     }
                                     if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
                                         now = manager.Move("King", now);
-                                        manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                        move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                     }
                                     break;
                                 case "Queen":
                                     if(Diagonal(vector) || Strait(vector)){
                                         if(!manager.CheckObstacle(indexPrevious,vector,   len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
                                             now = manager.Move("Queen",now);
-                                            manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                            move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                         }
                                     }
                                     break;
@@ -345,7 +389,7 @@ public class Board {
                                     if(Diagonal(vector)){
                                         if(!manager.CheckObstacle(indexPrevious,vector, len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
                                             now = manager.Move("Bishop",now);
-                                            manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                            move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                         }
                                     }
                                     break;
@@ -354,7 +398,7 @@ public class Board {
                                     for (int[] ints : vectors) {
                                         if (vector[0] == ints[0] && vector[1] == ints[1] && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
                                             now = manager.Move("Knight",now);
-                                            manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                            move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                         }
                                     }
                                     break;
@@ -362,11 +406,14 @@ public class Board {
                                     if(Strait(vector)){
                                         if(!manager.CheckObstacle(indexPrevious,vector,   len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
                                             now = manager.Move("Rook",now);
-                                            manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                            move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                         }
                                     }
                                     break;
                                 case "Pawn":
+                                    if (nowRow==5){
+                                        // trzeba sprawdzić czy w history moves jest ruch o dwa 
+                                    }
                                     if(nowRow==0){
                                         JPopupMenu menuNow = (JPopupMenu) nowSquare.getComponent(0);
                                         menuNow.setPopupSize(100,400);
@@ -375,7 +422,7 @@ public class Board {
                                     //System.out.println("Vector: " + vector[0] + " " + vector[1]);System.out.println("Jestem: " + manager.pieces[indexNow].color + " drugi " + manager.pieces[indexPrevious].color + " tymczas: " + tymczas.color + " now " + nowPiece.color);
                                     if(vector[0]!=0&&vector[1]==0 && (len==1 || (tymczas.firstMove && len==2)) && !manager.CheckObstacle(indexPrevious,vector,len+1)){
                                         now = manager.Move("Pawn",now);
-                                        manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                        move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                         tymczas.firstMove=false;
                                     }
                                     else if(Diagonal(vector) && len<2 && !Objects.equals(nowPiece.name, "PlaceHolder") && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
@@ -383,7 +430,7 @@ public class Board {
                                             now = manager.Move("Pawn",now);
                                             tymczas.firstMove=false;
                                         }
-                                        manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                        move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                     }
                                     break;
                                 default:
@@ -391,7 +438,7 @@ public class Board {
                         }
                     }
                     right.ShowTurn(manager.turn);
-
+                    right.AddToHistory(move);
 
                     //System.out.println("manager.pieces [indexNow] "+ manager.pieces[indexNow]);
                     //System.out.println("manager.pieces [indexPrevious] " + manager.pieces[indexPrevious]);
@@ -402,6 +449,8 @@ public class Board {
 
             manager.previous = now;
 
+
             }
         };
+
 }

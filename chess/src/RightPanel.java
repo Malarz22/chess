@@ -1,48 +1,25 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeListener;
+import java.awt.event.ActionListener;
 
 public class RightPanel extends JPanel {
     JButton nowaGra = new JButton("New Game");
-    JLabel history = new JLabel(new ImageIcon("wood.jpg"));
+    JPanel historyPanel = new JPanel();
+
+    BoxLayout boxLayout = new BoxLayout(historyPanel, BoxLayout.Y_AXIS);
+    JLabel turnLabel = new JLabel();
     List movesHistory = new List();
-    RightPanel(){
+    RightPanel(Board b, JPanel boardPanel){
+        historyPanel.setLayout(boxLayout);
         JPanel buttonContainer = new JPanel();
-        nowaGra.addActionListener(new Action() {
-            @Override
-            public Object getValue(String key) {
-                return null;
-            }
-
-            @Override
-            public void putValue(String key, Object value) {
-
-            }
-
-            @Override
-            public void setEnabled(boolean b) {
-
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return false;
-            }
-
-            @Override
-            public void addPropertyChangeListener(PropertyChangeListener listener) {
-
-            }
-
-            @Override
-            public void removePropertyChangeListener(PropertyChangeListener listener) {
-
-            }
-
+        nowaGra.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Clicked");
+                b.SetUpBoard();
+                boardPanel.updateUI();
             }
         });
         this.setLayout(null); // Wyłączenie menedżera układu w panelu
@@ -52,25 +29,31 @@ public class RightPanel extends JPanel {
 
         buttonContainer.setBackground(Color.YELLOW);
         this.add(buttonContainer);
-        history.setBounds(700+560/2-200/4,100,200,400);
-
-        this.add(history);
+        historyPanel.setBounds(700+560/2-200/4,100,200,400);
+        historyPanel.setOpaque(true);
+        historyPanel.setBackground(Color.WHITE);
+        JLabel text = new JLabel("HISTORIA");
+        text.setAlignmentX(0.5f);
+        historyPanel.add(text);
+        turnLabel.setAlignmentX(0.5f);
+        historyPanel.add(turnLabel);
+        this.add(historyPanel);
     }
 
     public void ShowTurn(boolean turn){
         if (turn) {
-            JLabel k = new JLabel("White turn");
-            history.add(k);
-            history.updateUI();
-            System.out.println("Białe");
+            turnLabel.setText("White Turn");
             return;
         }
-        JLabel k = new JLabel("Black turn");
-        System.out.println("czarne");
-        history.add(k);
+        turnLabel.setText("Black Turn");
     }
 
-    public void AddToHistory(){
-        movesHistory.add("ruch");
+    public void AddToHistory(String move){
+        movesHistory.add(move);
+        if(move.length()==0) return;
+        String beutifullMove = move.substring(0,2) + "         " + move.substring(move.length()-2);
+        JLabel a =new JLabel(beutifullMove);
+        a.setAlignmentX(0.5f);
+        historyPanel.add(a);
     }
 }

@@ -4,13 +4,14 @@ import java.awt.event.MouseEvent;
 import java.util.Objects;
 
 
-public class Piece {
-    ImageIcon look = new ImageIcon();
-    JLabel pack = new JLabel();
+public abstract class Piece {
+    ImageIcon look;
+    JLabel pack;
     String color;
     String name;
     int points;
-    boolean firstMove = true;
+    boolean firstMove;
+
     //boolean firstMove=true;
     // Visualization of the possibilities array:
     //int[][] possibilities = new int[8][8];
@@ -32,11 +33,20 @@ public class Piece {
 
     Piece(){
         color="";
-        name="";
+        name="PlaceHolder";
         points=0;
     }
 
-    Piece(String Name,String Color){
+    public Piece(String name, String color, int points, String imagePath) {
+        this.name = name;
+        this.color = color;
+        this.points = points;
+        this.look = new ImageIcon(imagePath);
+        this.pack = new JLabel(look, SwingConstants.CENTER);
+        this.firstMove = true;
+    }
+    ;
+/*    Piece(String Name,String Color){
         color = Color;
         name=Name;
         //Wybieranie koloru
@@ -103,11 +113,13 @@ public class Piece {
         pack.setVerticalAlignment(SwingConstants.CENTER);
 
         pack.setIcon(look);
-    }
+    }*/
+
     @Override
     public String toString(){
         return "To jest figura: " + name + " jest koloru: " + color + " jest warta punktów: " + points;
     }
 
 
+    public abstract void Move();
 }

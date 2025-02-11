@@ -33,7 +33,7 @@ public abstract class Piece {
 
     Piece(){
         color="";
-        name="PlaceHolder";
+        name="EPlaceHolder";
         points=0;
     }
 

@@ -259,6 +259,7 @@ public class Board {
 
                                     if(tymczas.move==1 && abs(vector[1])==2 && manager.pieces[rookIndex].name=="Rook" && manager.pieces[rookIndex].move == 1 && !manager.CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious)){
                                         now = manager.Move("King", now);
+                                        manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                         System.out.println("roszada");
                                         //System.out.println("Panel components");
                                         for (int i=0;i<((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponentCount();i++){
@@ -267,6 +268,7 @@ public class Board {
                                         manager.previous=(JLabel) ((JPanel) boardSquares.getComponent(rookIndex)).getComponent(1);
                                         now = (JLabel) ((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponent(1);
                                         now = manager.Move("Rook", now);
+                                        manager.UpdatePieces(rookIndex,indexNow-vector[1]/abs(vector[1]), manager.pieces[rookIndex]);
                                         manager.turn=!manager.turn;
                                         move+="roszada";
                                         break;
@@ -281,7 +283,6 @@ public class Board {
                                         if (!manager.CheckObstacle(indexPrevious, vector, len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
                                             now = manager.Move("Queen", now);
                                             move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
-
                                         }
                                     }
                                     break;
@@ -328,7 +329,7 @@ public class Board {
                                             manager.turn = !manager.turn;
                                         }
                                     }
-                                    if(nowRow==7){
+                                    if(nowRow==7 && previousRow == 6){
                                         JPopupMenu menuNow = (JPopupMenu) nowSquare.getComponent(0);
                                         menuNow.setPopupSize(100,400);
                                         menuNow.show(nowSquare,0,0);
@@ -368,6 +369,7 @@ public class Board {
 
                                     if(tymczas.move == 1 && abs(vector[1])==2 && manager.pieces[rookIndex].name=="Rook" && manager.pieces[rookIndex].move == 1 && !manager.CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious)){
                                         now = manager.Move("King", now);
+                                        manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                         System.out.println("roszada");
                                         //System.out.println("Panel components");
                                         for (int i=0;i<((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponentCount();i++){
@@ -376,6 +378,7 @@ public class Board {
                                         manager.previous=(JLabel) ((JPanel) boardSquares.getComponent(rookIndex)).getComponent(1);
                                         now = (JLabel) ((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponent(1);
                                         now = manager.Move("Rook", now);
+                                        manager.UpdatePieces(rookIndex,indexNow-vector[1]/abs(vector[1]), manager.pieces[rookIndex]);
                                         manager.turn=!manager.turn;
                                         move+="roszada";
                                         break;
@@ -441,7 +444,7 @@ public class Board {
                                             manager.turn = !manager.turn;
                                         }
                                     }
-                                    if(nowRow==0){
+                                    if(nowRow==0 && previousRow == 1){
                                         JPopupMenu menuNow = (JPopupMenu) nowSquare.getComponent(0);
                                         menuNow.setPopupSize(100,400);
                                         menuNow.show(nowSquare,0,0);
@@ -475,7 +478,7 @@ public class Board {
 
 
                 }
-
+            manager.ShowBoard();
             manager.previous = now;
 
 

@@ -67,6 +67,35 @@ public class PiecesManagment  {
         return false;
     }
 
+    public void ShowBoard(){
+        /*int j = 0;
+        while (j < pieces.length){
+            System.out.println(pieces[j].toString() + "  " + j);
+            j+=1;
+        }*/
+
+        for (int i = 0; i < 8; i++) { // Loop through rows
+            for (int j = 0; j < 8; j++) { // Loop through columns
+                int index = i * 8 + j; // Convert 2D index to 1D
+                if (pieces[index] != null) {
+                    System.out.print(pieces[index].name.charAt(0) + "  ");
+                } else {
+                    System.out.print("0  "); // Empty spaces as '0'
+                }
+            }
+            System.out.println(); // New line after each row
+        }
+
+    }
+
+    public String PreventCheck(){
+        Piece[] tymPieces = pieces;
+        
+
+
+        return "";
+    }
+
     public JLabel Move(String name, JLabel now){
         ImageIcon piece = (ImageIcon) previous.getIcon();
         previous.setIcon(new ImageIcon("chess/pieces/placehHolder.png"));
@@ -75,6 +104,7 @@ public class PiecesManagment  {
 
         now.setName(name);
         turn=!turn;
+
         return now;
     }
 

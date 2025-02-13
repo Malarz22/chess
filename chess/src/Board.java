@@ -4,7 +4,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.List;
 import static java.lang.Math.*;
 
 public class Board {
@@ -241,12 +244,42 @@ public class Board {
                     int len = GetIndex(nowRow,nowColumn,previousRow,previousColumn);
                     //System.out.println(previous.getName());
 
+                    List<int[]> allowedMoves = new ArrayList<>();
+                    int[] moveList = {indexNow, indexPrevious};
+
                     Piece tymczas = manager.pieces[indexPrevious];
                     Piece nowPiece = manager.pieces[indexNow];
                     String move="";
                     if (manager.turn) {
                         if (Objects.equals(tymczas.color, "White")) {
-                            if(manager.CheckCheck(whiteKingPos)) System.out.println("Szach na białych");
+                            List<int[]> check = manager.CheckCheck(whiteKingPos);
+                            if(check.size()>1){
+                                System.out.println("Szach podwójny na białych");
+                                List<int[]> nowa1 = manager.PreventCheck(whiteKingPos,check.getFirst()[1]);
+                                List<int[]> nowa2 = manager.PreventCheck(whiteKingPos, check.get(1)[1]);
+                                for(int[] i :nowa1){
+                                    if(nowa2.contains(i)){
+                                        allowedMoves.add(i);
+                                    }
+                                }
+                            }
+                            else{
+                                if(check.getFirst()[0]==1){
+                                    List<int[]> nowa = manager.PreventCheck(whiteKingPos,check.getFirst()[1]);
+                                    for(int[] ints : nowa){
+                                        for(int j : ints){
+                                            System.out.println(j);
+                                        }
+                                        allowedMoves.add(ints);
+                                        System.out.println("Koniec ruchu");
+                                    }
+                                }
+                            }
+                            boolean warunek = false;
+                            for(int[] i:allowedMoves){
+                                if(Arrays.equals(i, moveList)) warunek=true;
+                            }
+                            if(allowedMoves.isEmpty() || warunek)
                             switch (manager.previous.getName()) {
                                 case "King":
                                     int c;
@@ -271,11 +304,13 @@ public class Board {
                                         manager.UpdatePieces(rookIndex,indexNow-vector[1]/abs(vector[1]), manager.pieces[rookIndex]);
                                         manager.turn=!manager.turn;
                                         move+="roszada";
+                                        whiteKingPos=indexNow;
                                         break;
                                     }
                                     if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
                                         now = manager.Move("King", now);
                                         move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                        whiteKingPos=indexNow;
                                     }
                                     break;
                                 case "Queen":
@@ -356,7 +391,34 @@ public class Board {
                     }
                     else  {
                         if(Objects.equals(tymczas.color, "Black")){
-                            if(manager.CheckCheck(blackKingPos)) System.out.println("Szach na czarnych");
+                            List<int[]> check = manager.CheckCheck(blackKingPos);
+                            if(check.size()>1){
+                                System.out.println("Szach podwójny na białych");
+                                List<int[]> nowa1 = manager.PreventCheck(blackKingPos,check.getFirst()[1]);
+                                List<int[]> nowa2 = manager.PreventCheck(blackKingPos, check.get(1)[1]);
+                                for(int[] i :nowa1){
+                                    if(nowa2.contains(i)){
+                                        allowedMoves.add(i);
+                                    }
+                                }
+                            }
+                            else{
+                                if(check.getFirst()[0]==1){
+                                    List<int[]> nowa = manager.PreventCheck(blackKingPos,check.getFirst()[1]);
+                                    for(int[] ints : nowa){
+                                        for(int j : ints){
+                                            System.out.println(j);
+                                        }
+                                        allowedMoves.add(ints);
+                                        System.out.println("Koniec ruchu");
+                                    }
+                                }
+                            }
+                            boolean warunek = false;
+                            for(int[] i:allowedMoves){
+                                if(Arrays.equals(i, moveList)) warunek=true;
+                            }
+                            if(allowedMoves.isEmpty() || warunek)
                             switch (manager.previous.getName()){
                                 case "King":
                                     int c;
@@ -381,11 +443,14 @@ public class Board {
                                         manager.UpdatePieces(rookIndex,indexNow-vector[1]/abs(vector[1]), manager.pieces[rookIndex]);
                                         manager.turn=!manager.turn;
                                         move+="roszada";
+                                        blackKingPos=indexNow;
                                         break;
                                     }
                                     if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
                                         now = manager.Move("King", now);
                                         move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                        blackKingPos=indexNow;
+
                                     }
                                     break;
                                 case "Queen":

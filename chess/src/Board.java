@@ -132,7 +132,7 @@ public class Board {
                     manager.Move(manager.previous.getName(),manager.previous);
                 }
             });
-            //System.out.println("added");
+            //System.out.println("");
             menu.add(nowy);
             i+=-1;
         }
@@ -144,7 +144,6 @@ public class Board {
         manager = new PiecesManagment(this);
         boardSquares = new JPanel(new GridLayout(8,8));
         for (int column = 0; column < boardSize; column++) {
-            boolean added = false;
             if (column % 8 == 0) row += 1;
             JPanel square = new JPanel();
             square.setName(String.valueOf(column));
@@ -159,7 +158,6 @@ public class Board {
                 piece.setName(piecesNames[column]);
                 square.add(PromotionMenu("Black"),0);
                 square.add(piece);
-                added = true;
             } else if (column < 16) {
                 Piece a = new Pawn("White",GetColumn(column%8));
                 manager.pieces[column] = a;
@@ -167,7 +165,6 @@ public class Board {
 
                 piece.setName("Pawn");
                 square.add(piece);
-                added = true;
             } else if (column >= 48 && column < 56) {
                 Piece a = new Pawn("Black",GetColumn(column%8));;
                 manager.pieces[column] = a;
@@ -175,7 +172,6 @@ public class Board {
                 piece.setName("Pawn");
 
                 square.add(piece);
-                added = true;
             } else if (column >= 56) {
                 Piece a = createPiece(piecesNames[column-56], "Black");
                 manager.pieces[column] = a;
@@ -183,7 +179,6 @@ public class Board {
                 piece.setName(piecesNames[column - 56]);
                 square.add(PromotionMenu("White"),0);
                 square.add(piece);
-                added = true;
             } else {
                 piece = new JLabel(new ImageIcon("chess/pieces/placehHolder.png"));
                 manager.pieces[column]= new PlaceHolder();

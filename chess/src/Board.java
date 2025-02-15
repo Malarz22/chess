@@ -21,6 +21,7 @@ public class Board {
     Point initialClick;
     float RowsX = (float) this.boardSquares.getHeight() /8;
     float  ColY = (float) this.boardSquares.getWidth()/8;
+    boolean TheEnd=false;
 
     int pointsWhite = 0;
     int pointsBlack = 0;
@@ -221,10 +222,9 @@ public class Board {
     MouseAdapter myMouse = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-
                 initialClick = e.getPoint();
                 JLabel now = (JLabel) e.getSource();
-                if(!now.equals(manager.previous) && manager.previous!=null){
+                if(!now.equals(manager.previous) && manager.previous!=null && !TheEnd){
                     JPanel nowSquare = (JPanel) now.getParent();
                     JPanel previousSquare = (JPanel) manager.previous.getParent();
                     int indexNow = boardSquares.getComponentZOrder(nowSquare); // Indeks w siatce
@@ -274,7 +274,12 @@ public class Board {
                             for(int[] i:allowedMoves){
                                 if(Arrays.equals(i, moveList)) warunek=true;
                             }
-                            if(allowedMoves.isEmpty() || warunek)
+                            if(allowedMoves.isEmpty()&&check.getFirst()[0]==1){
+                                //implementacja końca gry
+                                right.ShowWinner("Black");
+                                TheEnd = true;
+                            }
+                            if(warunek)
                             switch (manager.previous.getName()) {
                                 case "King":
                                     int c;
@@ -392,8 +397,8 @@ public class Board {
                                 List<int[]> nowa1 = manager.PreventCheck(blackKingPos,check.getFirst()[1]);
                                 List<int[]> nowa2 = manager.PreventCheck(blackKingPos, check.get(1)[1]);
                                 for(int[] i :nowa1){
-                                    if(nowa2.contains(i)){
-                                        allowedMoves.add(i);
+                                    for(int[] j : nowa2){
+                                        if(Arrays.equals(i, j))  allowedMoves.add(i);
                                     }
                                 }
                             }
@@ -413,7 +418,12 @@ public class Board {
                             for(int[] i:allowedMoves){
                                 if(Arrays.equals(i, moveList)) warunek=true;
                             }
-                            if(allowedMoves.isEmpty() || warunek)
+                            if(allowedMoves.isEmpty()&&check.getFirst()[0]==1){
+                                //implementacja końca gry
+                                right.ShowWinner("Black");
+                                TheEnd = true;
+                            }
+                            if(warunek)
                             switch (manager.previous.getName()){
                                 case "King":
                                     int c;
@@ -425,21 +435,29 @@ public class Board {
                                     //System.out.format("King %b, %b, %b, %b, %b " , tymczas.firstMove , abs(vector[1])==2, manager.pieces[rookIndex].name=="Rook",  manager.pieces[ rookIndex].firstMove, !CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious));
 
                                     if(tymczas.move == 1 && abs(vector[1])==2 && manager.pieces[rookIndex].name=="Rook" && manager.pieces[rookIndex].move == 1 && !manager.CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious)){
-                                        now = manager.Move("King", now);
-                                        manager.UpdatePieces(indexPrevious,indexNow,tymczas);
-                                        System.out.println("roszada");
-                                        //System.out.println("Panel components");
-                                        for (int i=0;i<((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponentCount();i++){
-                                            System.out.println(((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponent(i));
+                                        boolean throughChecks = false;
+                                        for (int i=0;i<2;i++){
+                                            List<int[]> temp = manager.CheckCheck(indexNow-(vector[1]/abs(vector[1])*i),"Black");
+                                            if(temp.getFirst()[0]==1) throughChecks=true;
                                         }
-                                        manager.previous=(JLabel) ((JPanel) boardSquares.getComponent(rookIndex)).getComponent(1);
-                                        now = (JLabel) ((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponent(1);
-                                        now = manager.Move("Rook", now);
-                                        manager.UpdatePieces(rookIndex,indexNow-vector[1]/abs(vector[1]), manager.pieces[rookIndex]);
-                                        manager.turn=!manager.turn;
-                                        move+="roszada";
-                                        blackKingPos=indexNow;
-                                        break;
+                                        if(!throughChecks)
+                                        {
+                                            now = manager.Move("King", now);
+                                            manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            System.out.println("roszada");
+                                            //System.out.println("Panel components");
+                                            for (int i = 0; i < ((JPanel) boardSquares.getComponent(indexNow - vector[1] / abs(vector[1]))).getComponentCount(); i++) {
+                                                System.out.println(((JPanel) boardSquares.getComponent(indexNow - vector[1] / abs(vector[1]))).getComponent(i));
+                                            }
+                                            manager.previous = (JLabel) ((JPanel) boardSquares.getComponent(rookIndex)).getComponent(1);
+                                            now = (JLabel) ((JPanel) boardSquares.getComponent(indexNow - vector[1] / abs(vector[1]))).getComponent(1);
+                                            now = manager.Move("Rook", now);
+                                            manager.UpdatePieces(rookIndex, indexNow - vector[1] / abs(vector[1]), manager.pieces[rookIndex]);
+                                            manager.turn = !manager.turn;
+                                            move += "roszada";
+                                            blackKingPos = indexNow;
+                                            break;
+                                        }
                                     }
                                     if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
                                         now = manager.Move("King", now);
@@ -538,8 +556,8 @@ public class Board {
 
 
                 }
-            manager.ShowBoard();
-            manager.previous = now;
+                //manager.ShowBoard();
+                manager.previous = now;
 
 
             }

@@ -50,6 +50,12 @@ public class RightPanel extends JPanel {
         turnLabel.setText("Black Turn");
     }
 
+    public void ShowWinner(String color){
+        JLabel a =new JLabel("Winner is " + color);
+        a.setAlignmentX(0.5f);
+        historyPanel.add(a);
+    }
+
     public void AddToHistory(String move){
         movesHistory.add(move);
         if(move.length()==0) return;

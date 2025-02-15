@@ -21,6 +21,7 @@ public class PiecesManagment  {
         return CheckCheck(index,pieces[index].color);
     }
 
+
     public List<int[]> CheckCheck(int index, String color){
         List<int[]> checks = new ArrayList<>();
         int[] falseA = new int[]{0,1};

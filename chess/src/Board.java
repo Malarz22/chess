@@ -279,7 +279,7 @@ public class Board {
                                 right.ShowWinner("Black");
                                 TheEnd = true;
                             }
-                            if(warunek)
+                            if(allowedMoves.isEmpty() ||warunek)
                             switch (manager.previous.getName()) {
                                 case "King":
                                     int c;
@@ -307,7 +307,7 @@ public class Board {
                                         whiteKingPos=indexNow;
                                         break;
                                     }
-                                    if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
+                                    if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color ) && manager.CheckCheck(indexNow,"White").getFirst()[0]==0){
                                         now = manager.Move("King", now);
                                         move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                         whiteKingPos=indexNow;
@@ -416,14 +416,17 @@ public class Board {
                             }
                             boolean warunek = false;
                             for(int[] i:allowedMoves){
-                                if(Arrays.equals(i, moveList)) warunek=true;
+                                if (Arrays.equals(i, moveList)) {
+                                    warunek = true;
+                                    break;
+                                }
                             }
                             if(allowedMoves.isEmpty()&&check.getFirst()[0]==1){
                                 //implementacja końca gry
                                 right.ShowWinner("Black");
                                 TheEnd = true;
                             }
-                            if(warunek)
+                            if(allowedMoves.isEmpty() || warunek)
                             switch (manager.previous.getName()){
                                 case "King":
                                     int c;
@@ -459,7 +462,7 @@ public class Board {
                                             break;
                                         }
                                     }
-                                    if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
+                                    if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color) && manager.CheckCheck(indexNow,"Black").getFirst()[0]==0){
                                         now = manager.Move("King", now);
                                         move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                         blackKingPos=indexNow;

@@ -157,12 +157,11 @@ public class PiecesManagment  {
                         //System.out.println("Znaleziono przeszkode");
                         if (
                             pieces[kingIndex].color == pieces[indexNow].color && kingIndex != indexNow &&
-                            ((j <= 3 && (pieces[indexNow].name.equals("Rook") || pieces[indexNow].name.equals("Queen"))) ||
-                            (j > 3 && (pieces[indexNow].name.equals("Bishop") || pieces[indexNow].name.equals("Queen")) ||
-                            (pieces[indexNow].name.equals("Pawn") && (abs(indexNow-checkingPieceIndex)==7||abs(indexNow-checkingPieceIndex)==9))))
-                            ) {
-
-
+                            ((j <= 3 && (pieces[indexNow].name.equals("Rook") || pieces[indexNow].name.equals("Queen")) ||
+                            (pieces[indexNow].name.equals("Pawn") && (abs(indexNow-checkingPieceIndex)%7==0||abs(indexNow-checkingPieceIndex)%9==0))) ||
+                            (j > 3 && (pieces[indexNow].name.equals("Bishop") || pieces[indexNow].name.equals("Queen"))
+                            ))
+                            ){
                             possibleMoves.add(new int[]{checkingPieceIndex, indexNow});
                         }
                         break;
@@ -196,9 +195,10 @@ public class PiecesManagment  {
                         //System.out.println("Znaleziono przeszkode");
                         if(
                             pieces[kingIndex].color == pieces[indexNow].color && kingIndex != indexNow &&
-                            ((j <= 3 && (pieces[indexNow].name.equals("Rook") || pieces[indexNow].name.equals("Queen"))) ||
-                            (j > 3 && (pieces[indexNow].name.equals("Bishop") || pieces[indexNow].name.equals("Queen")) ||
-                            (pieces[indexNow].name.equals("Pawn") && (abs(indexNow-checkingPieceIndex)==7||abs(indexNow-checkingPieceIndex)==9))))
+                            ((j <= 3 && (pieces[indexNow].name.equals("Rook") || pieces[indexNow].name.equals("Queen") ||
+                            (pieces[indexNow].name.equals("Pawn") && (abs(tymIndex-checkingPieceIndex)%7==0||abs(tymIndex-checkingPieceIndex)%9==0)))) ||
+                            (j > 3 && (pieces[indexNow].name.equals("Bishop") || pieces[indexNow].name.equals("Queen"))
+                            ))
                             ){
                             possibleMoves.add(new int[]{tymIndex,indexNow});
                         }

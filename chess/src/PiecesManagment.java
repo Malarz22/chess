@@ -23,19 +23,22 @@ public class PiecesManagment  {
 
 
     public List<int[]> CheckCheck(int index, String color){
+        // Najpierw wykonywany jest ruch, a dopiero potem sprawdzanie szacha - w ten sposób poprzednie położenie figury nie chroni jej przed dalszym szachem.
+        // Aby tego dokonać, używamy metody UpdatePieces
+        // Cofnięcie ruchu jest równoznaczne z odwróceniem indeksów w metodzie UpdatePieces
+        
         List<int[]> checks = new ArrayList<>();
         int[] falseA = new int[]{0,1};
         checks.add(falseA);
-        int possibleWays =8;
+        int possibleWays = 8;   
         int possibleLen = 8;
         int[][] vectors = {{0,1},{1,0},{0,-1},{-1,0},{1,1},{-1,-1},{-1,1},{1,-1}};
         //sprawdzanie szachu
         //trzeba rozważyć kilka przypadków:
-        //       szach zwykłky: figura po ruchu atakuje króla
+        //       szach zwykły: figura po ruchu atakuje króla
         //       szach z odkrycia: figura za figurą ruszoną atakuje króla
         //       szach podwójny tego jeszcze nie ma!!!
         //       Sprawdzać czy król rusza się w szach
-        //
         for (int j = 0; j<possibleWays; j++)
         {
             int[] vector = vectors[j];
@@ -52,16 +55,21 @@ public class PiecesManagment  {
                     //System.out.println("Koniec planszy");
                     break;
                 }
-                ////System.out.println("index: "+index);
-                JPanel tym =(JPanel) board.boardSquares.getComponent(indexNow);
-                if(!Objects.equals(tym.getComponent(CheckNumberOfComponents(tym)).getName(), "PlaceHolder")){
+
+                if(!pieces[indexNow].name.equals("EPlaceHolder")){
                     //System.out.println("Znaleziono przeszkode");
-                    if(!pieces[indexNow].color.equals(color) && ((j<=3 && (pieces[indexNow].name.equals("Rook") || pieces[indexNow].name.equals("Queen")))||(j>3 && (pieces[indexNow].name.equals("Bishop") || pieces[indexNow].name.equals("Queen")))) ) {
+                    boolean isSameColor = pieces[indexNow].color.equals(color);
+                    boolean isRookOrQueen = (pieces[indexNow].name.equals("Rook") || pieces[indexNow].name.equals("Queen"));
+                    boolean isBishopOrQueen = pieces[indexNow].name.equals("Bishop") || pieces[indexNow].name.equals("Queen");
+                    boolean isWhitePawn;
+                    if(!isSameColor && ((j<=3 && isRookOrQueen)||(j>3 && ( isBishopOrQueen || ((pieces[indexNow].name.equals("Pawn") && (abs(indexNow-index)==7||abs(indexNow-index)==9)))))) ) {
                         checks.add(new int[] {1,indexNow});
                         checks.remove(falseA);
                     }
+
                     break;
                 }
+
             }
         }
 
@@ -80,11 +88,6 @@ public class PiecesManagment  {
     }
 
     public void ShowBoard(){
-        /*int j = 0;
-        while (j < pieces.length){
-            System.out.println(pieces[j].toString() + "  " + j);
-            j+=1;
-        }*/
 
         for (int i = 0; i < 8; i++) { // Loop through rows
             for (int j = 0; j < 8; j++) { // Loop through columns
@@ -102,6 +105,7 @@ public class PiecesManagment  {
 
     public List<int[]> PreventCheck(int kingIndex, int checkingPieceIndex){
         List<int[]> possibleMoves = new ArrayList<>();
+        Piece a = pieces[kingIndex];
         //can move pieces only if they prevent check or avoid check (King)
         //I must find those moves and then check if the move that player whats to do is one of them
         //how to find this moves?
@@ -114,26 +118,26 @@ public class PiecesManagment  {
         int checkingPieceCol = checkingPieceIndex%8;
         int[] vector = {checkingPieceRow-kingRow,checkingPieceCol-kingCol};
         int len = (int)sqrt(pow(vector[0],2)+pow(vector[1],2));
-        int[][] vectors = {{0,1},{1,0},{0,-1},{-1,0},{1,1},{-1,-1},{-1,1},{1,-1}};
+        int[][] vectors = {{0,1},{1,0},{0,-1},{-1,0},{1,1},{-1,1},{1,-1},{-1,-1}};
         int tymIndex = kingIndex;
         int b = abs(vector[1]);
         int c = abs(vector[0]);
         //zapobieganie dzieleniu przez 0
         if(b==0) b=1;
         if(c==0) c=1;
-
+        pieces[kingIndex]=new PlaceHolder();
         for(int[] i : vectors){
             int index = kingIndex+i[0]*8+i[1];
             if(index>63 || index<0 || (index%8==0 && vector[1]==-1) || (index%8==7 && vector[1]==1)) {
-                System.out.println("Koniec planszy");
                 continue;
             }
-            if(Objects.equals(pieces[index].name, "EPlaceHolder") && CheckCheck(index, "White").getFirst()[0]==0){
-                System.out.println(index + " " + kingIndex);
+
+            if(!Objects.equals(pieces[index].color, a.color) && CheckCheck(index, a.color).getFirst()[0]==0){
                 possibleMoves.add(new int[]{index,kingIndex});
             }
-        }
 
+        }
+        pieces[kingIndex]=a;
         if(pieces[checkingPieceIndex].name.equals("Knight")) {
 
             for (int j = 0; j < possibleWays; j++) {
@@ -151,15 +155,13 @@ public class PiecesManagment  {
                         //System.out.println("Koniec planszy");
                         break;
                     }
-                    ////System.out.println("index: "+index);
-                    JPanel tym = (JPanel) board.boardSquares.getComponent(indexNow);
-                    if (!Objects.equals(tym.getComponent(CheckNumberOfComponents(tym)).getName(), "PlaceHolder")) {
+                    if (!pieces[indexNow].name.equals("EPlaceHolder")) {
                         //System.out.println("Znaleziono przeszkode");
                         if (
-                            pieces[kingIndex].color == pieces[indexNow].color && kingIndex != indexNow &&
-                            ((j <= 3 && (pieces[indexNow].name.equals("Rook") || pieces[indexNow].name.equals("Queen")) ||
-                            (pieces[indexNow].name.equals("Pawn") && (abs(indexNow-checkingPieceIndex)%7==0||abs(indexNow-checkingPieceIndex)%9==0))) ||
-                            (j > 3 && (pieces[indexNow].name.equals("Bishop") || pieces[indexNow].name.equals("Queen"))
+                            pieces[kingIndex].color.equals(pieces[indexNow].color) && kingIndex != indexNow &&
+                            ((j <= 3 && (pieces[indexNow].name.equals("Rook") || pieces[indexNow].name.equals("Queen"))
+                            ) ||
+                            (j > 3 && (pieces[indexNow].name.equals("Bishop") || pieces[indexNow].name.equals("Queen") || (pieces[indexNow].name.equals("Pawn") && (abs(indexNow-checkingPieceIndex)%7==0||abs(indexNow-checkingPieceIndex)%9==0)))
                             ))
                             ){
                             possibleMoves.add(new int[]{checkingPieceIndex, indexNow});
@@ -189,17 +191,26 @@ public class PiecesManagment  {
                         //System.out.println("Koniec planszy");
                         break;
                     }
-                    ////System.out.println("index: "+index);
                     JPanel tym =(JPanel) board.boardSquares.getComponent(indexNow);
                     if(!Objects.equals(tym.getComponent(CheckNumberOfComponents(tym)).getName(), "PlaceHolder")){
                         //System.out.println("Znaleziono przeszkode");
-                        if(
-                            pieces[kingIndex].color == pieces[indexNow].color && kingIndex != indexNow &&
-                            ((j <= 3 && (pieces[indexNow].name.equals("Rook") || pieces[indexNow].name.equals("Queen") ||
-                            (pieces[indexNow].name.equals("Pawn") && (abs(tymIndex-checkingPieceIndex)%7==0||abs(tymIndex-checkingPieceIndex)%9==0)))) ||
-                            (j > 3 && (pieces[indexNow].name.equals("Bishop") || pieces[indexNow].name.equals("Queen"))
-                            ))
-                            ){
+                        // w tym ifie jest błąd
+                        boolean isSameColor = pieces[kingIndex].color.equals(pieces[indexNow].color);
+                        boolean isNotSameIndex = kingIndex != indexNow;
+                        boolean isStraightDirection = j <= 3;
+                        boolean isDiagonalDirection = j > 3;
+
+                        boolean isRookOrQueen = pieces[indexNow].name.equals("Rook") || pieces[indexNow].name.equals("Queen");
+                        boolean isBishopOrQueen = pieces[indexNow].name.equals("Bishop") || pieces[indexNow].name.equals("Queen");
+
+                        boolean isPawnAttackingDiagonally = pieces[indexNow].name.equals("Pawn") &&
+                                (Math.abs(tymIndex - checkingPieceIndex) % 7 == 0 ||
+                                 Math.abs(tymIndex - checkingPieceIndex) % 9 == 0);
+
+                        boolean isValidStraightPiece = isStraightDirection && (isRookOrQueen || isPawnAttackingDiagonally);
+                        boolean isValidDiagonalPiece = isDiagonalDirection && isBishopOrQueen;
+
+                        if(isSameColor && isNotSameIndex && (isValidDiagonalPiece || isValidStraightPiece)){
                             possibleMoves.add(new int[]{tymIndex,indexNow});
                         }
                         break;
@@ -211,7 +222,7 @@ public class PiecesManagment  {
             for (int[] ints : vectors2) {
                 int indexNow=tymIndex+ints[0]*8+ints[1];
                 if(indexNow>63 || indexNow<0 || (indexNow%8==0 && ints[1]<=-1) || (indexNow%8==7 && ints[1]>=1)) continue;
-                if(pieces[indexNow].name=="Knight" && pieces[kingIndex].color==pieces[indexNow].color){
+                if(pieces[indexNow].name.equals("Knight") && pieces[kingIndex].color.equals(pieces[indexNow].color)){
                     possibleMoves.add(new int[]{tymIndex,indexNow});
                 }
             }
@@ -234,16 +245,16 @@ public class PiecesManagment  {
     }
 
     public String UpdatePieces(int index1, int index2, Piece a){
-        String move = board.GetCoordinates(index1);
-        move += board.GetCoordinates(index2);
-        pieces[index1] = new PlaceHolder();
-        pieces[index2] = a;
-        return move;
+        return UpdatePieces(index1,index2,a,pieces);
     }
 
 
-    public void UpdatePossibilities(){
-        
+    public String UpdatePieces(int index1, int index2, Piece a, Piece[] pieces1){
+        String move = board.GetCoordinates(index1);
+        move += board.GetCoordinates(index2);
+        pieces1[index1] = new PlaceHolder();
+        pieces1[index2] = a;
+        return move;
     }
 
     public boolean CheckObstacle(int index ,int[] vector, int len){

@@ -209,14 +209,14 @@ public class Board {
     }
 
     private Piece createPiece(String name, String color) {
-        switch (name) {
-            case "King": return new King(color);
-            case "Queen": return new Queen(color);
-            case "Bishop": return new Bishop(color);
-            case "Knight": return new Knight(color);
-            case "Rook": return new Rook(color);
-            default: return null;
-        }
+        return switch (name) {
+            case "King" -> new King(color);
+            case "Queen" -> new Queen(color);
+            case "Bishop" -> new Bishop(color);
+            case "Knight" -> new Knight(color);
+            case "Rook" -> new Rook(color);
+            default -> null;
+        };
     }
 
     MouseAdapter myMouse = new MouseAdapter() {
@@ -248,13 +248,15 @@ public class Board {
                     if (manager.turn) {
                         if (Objects.equals(tymczas.color, "White")) {
                             List<int[]> check = manager.CheckCheck(whiteKingPos);
-                            if(check.size()>1){
+                            if(check.size()==2){
                                 System.out.println("Szach podwójny na białych");
                                 List<int[]> nowa1 = manager.PreventCheck(whiteKingPos,check.getFirst()[1]);
                                 List<int[]> nowa2 = manager.PreventCheck(whiteKingPos, check.get(1)[1]);
                                 for(int[] i :nowa1){
-                                    if(nowa2.contains(i)){
-                                        allowedMoves.add(i);
+                                    for (int[] j:nowa2){
+                                        if(Arrays.equals(i,j)){
+                                            allowedMoves.add(i);
+                                        }
                                     }
                                 }
                             }
@@ -279,110 +281,112 @@ public class Board {
                                 right.ShowWinner("Black");
                                 TheEnd = true;
                             }
-                            if(allowedMoves.isEmpty() ||warunek)
-                            switch (manager.previous.getName()) {
-                                case "King":
-                                    int c;
-                                    if(vector[1]>0) {
-                                        c = 2;
-                                    }
-                                    else c = -1;
-                                    int rookIndex=indexPrevious+vector[1]+c;
-                                    //System.out.format("King %b, %b, %b, %b, %b " , tymczas.firstMove , abs(vector[1])==2, manager.pieces[rookIndex].name=="Rook",  manager.pieces[ rookIndex].firstMove, !CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious));
+                            if(allowedMoves.isEmpty() ||warunek && !TheEnd) {
+                                switch (manager.previous.getName()) {
+                                    case "King":
+                                        int c;
+                                        if(vector[1]>0) {
+                                            c = 2;
+                                        }
+                                        else c = -1;
+                                        int rookIndex=indexPrevious+vector[1]+c;
+                                        //System.out.format("King %b, %b, %b, %b, %b " , tymczas.firstMove , abs(vector[1])==2, manager.pieces[rookIndex].name=="Rook",  manager.pieces[ rookIndex].firstMove, !CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious));
 
-                                    if(tymczas.move==1 && abs(vector[1])==2 && manager.pieces[rookIndex].name=="Rook" && manager.pieces[rookIndex].move == 1 && !manager.CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious)){
-                                        now = manager.Move("King", now);
-                                        manager.UpdatePieces(indexPrevious,indexNow,tymczas);
-                                        System.out.println("roszada");
-                                        //System.out.println("Panel components");
-                                        for (int i=0;i<((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponentCount();i++){
-                                            System.out.println(((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponent(i));
-                                        }
-                                        manager.previous=(JLabel) ((JPanel) boardSquares.getComponent(rookIndex)).getComponent(1);
-                                        now = (JLabel) ((JPanel) boardSquares.getComponent(indexNow-vector[1]/abs(vector[1]))).getComponent(1);
-                                        now = manager.Move("Rook", now);
-                                        manager.UpdatePieces(rookIndex,indexNow-vector[1]/abs(vector[1]), manager.pieces[rookIndex]);
-                                        manager.turn=!manager.turn;
-                                        move+="roszada";
-                                        whiteKingPos=indexNow;
-                                        break;
-                                    }
-                                    if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color ) && manager.CheckCheck(indexNow,"White").getFirst()[0]==0){
-                                        now = manager.Move("King", now);
-                                        move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
-                                        whiteKingPos=indexNow;
-                                    }
-                                    break;
-                                case "Queen":
-                                    if (Diagonal(vector) || Strait(vector)) {
-                                        if (!manager.CheckObstacle(indexPrevious, vector, len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
-                                            now = manager.Move("Queen", now);
-                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
-                                        }
-                                    }
-                                    break;
-                                case "Bishop":
-                                    if (Diagonal(vector)) {
-                                        if (!manager.CheckObstacle(indexPrevious, vector, len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
-                                            now = manager.Move("Bishop", now);
-                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
-                                        }
-                                    }
-                                    break;
-                                case "Knight":
-                                    int[][] vectors = {{1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1}};
-                                    for (int[] ints : vectors) {
-                                        if (vector[0] == ints[0] && vector[1] == ints[1] && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
-                                            now = manager.Move("Knight", now);
-                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
-                                        }
-                                    }
-                                    break;
-                                case "Rook":
-                                    if (Strait(vector)) {
-                                        if (!manager.CheckObstacle(indexPrevious, vector, len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
+                                        if(tymczas.move==1 && abs(vector[1])==2 && manager.pieces[rookIndex].name.equals("Rook") && manager.pieces[rookIndex].move == 1 && !manager.CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious)){
+                                            int afterMoveRoomIndex =indexNow-vector[1]/abs(vector[1]);
+                                            now = manager.Move("King", now);
+                                            manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                            System.out.println("roszada");
+                                            //System.out.println("Panel components");
+                                            for (int i=0;i<((JPanel) boardSquares.getComponent(afterMoveRoomIndex)).getComponentCount();i++){
+                                                System.out.println(((JPanel) boardSquares.getComponent(afterMoveRoomIndex)).getComponent(i));
+                                            }
+                                            manager.previous=(JLabel) ((JPanel) boardSquares.getComponent(rookIndex)).getComponent(1);
+                                            now = (JLabel) ((JPanel) boardSquares.getComponent(afterMoveRoomIndex)).getComponent(1);
                                             now = manager.Move("Rook", now);
-                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            manager.UpdatePieces(rookIndex,afterMoveRoomIndex, manager.pieces[rookIndex]);
+                                            manager.turn=!manager.turn;
+                                            move+="roszada";
+                                            whiteKingPos=indexNow;
+                                            break;
                                         }
-                                    }
-                                    break;
-                                case "Pawn":
-                                    if(previousRow==4 && nowRow==5 && abs(nowColumn-previousColumn)==1){
-                                        int pawnIndex = indexNow-8;
-                                        int tymRow = indexNow / 8;
-                                        int tymCol = indexNow % 8;
-                                        vector = new int[]{tymRow-previousRow,tymCol-previousColumn};
-                                        Pawn taken = (Pawn) manager.pieces[pawnIndex];
-                                        String rightMove = String.format("%s%d%s%d",GetColumn(tymCol),tymRow+2,GetColumn(tymCol),tymRow);
-                                        if(taken.startingColumn == GetColumn(tymCol) && taken.move == 2 && right.movesHistory.getLast().equals(rightMove)) {
-                                            now = manager.Move("Pawn", now);
-                                            manager.UpdatePieces(indexPrevious, indexNow, tymczas);
-                                            manager.pieces[pawnIndex] = new PlaceHolder();
-                                            JLabel tym = (JLabel) boardSquares.getComponent(pawnIndex).getComponentAt(1, 1);
-                                            tym = manager.Move("PlaceHolder", tym);
-                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
-                                            manager.turn = !manager.turn;
+                                        if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color ) && manager.CheckCheck(indexNow,"White").getFirst()[0]==0){
+                                            now = manager.Move("King", now);
+                                            move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                            whiteKingPos=indexNow;
                                         }
-                                    }
-                                    if(nowRow==7 && previousRow == 6){
-                                        JPopupMenu menuNow = (JPopupMenu) nowSquare.getComponent(0);
-                                        menuNow.setPopupSize(100,400);
-                                        menuNow.show(nowSquare,0,0);
-                                    }
-                                    //System.out.println("Vector: " + vector[0] + " " + vector[1]);System.out.println("Jestem: " + manager.pieces[indexNow].color + " drugi " + manager.pieces[indexPrevious].color + " tymczas: " + tymczas.color + " now " + nowPiece.color);
-                                    if (vector[0] != 0 && vector[1] == 0 && (len==1 || (tymczas.move == 1 && len==2)) && !manager.CheckObstacle(indexPrevious, vector, len+1)) {
-                                        now = manager.Move("Pawn", now);
-                                        move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
-                                        tymczas.move +=1;
-                                    } else if (Diagonal(vector) && len < 2 && !Objects.equals(nowPiece.name, "PlaceHolder") && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
-                                        if (manager.CheckObstacle(indexPrevious, vector, 2)) {
+                                        break;
+                                    case "Queen":
+                                        if (Diagonal(vector) || Strait(vector)) {
+                                            if (!manager.CheckObstacle(indexPrevious, vector, len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
+                                                now = manager.Move("Queen", now);
+                                                move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            }
+                                        }
+                                        break;
+                                    case "Bishop":
+                                        if (Diagonal(vector)) {
+                                            if (!manager.CheckObstacle(indexPrevious, vector, len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
+                                                now = manager.Move("Bishop", now);
+                                                move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            }
+                                        }
+                                        break;
+                                    case "Knight":
+                                        int[][] vectors = {{1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1}};
+                                        for (int[] ints : vectors) {
+                                            if (vector[0] == ints[0] && vector[1] == ints[1] && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
+                                                now = manager.Move("Knight", now);
+                                                move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            }
+                                        }
+                                        break;
+                                    case "Rook":
+                                        if (Strait(vector)) {
+                                            if (!manager.CheckObstacle(indexPrevious, vector, len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
+                                                now = manager.Move("Rook", now);
+                                                move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                            }
+                                        }
+                                        break;
+                                    case "Pawn":
+                                        if(previousRow==4 && nowRow==5 && abs(nowColumn-previousColumn)==1){
+                                            int pawnIndex = indexNow-8;
+                                            int tymRow = indexNow / 8;
+                                            int tymCol = indexNow % 8;
+                                            vector = new int[]{tymRow-previousRow,tymCol-previousColumn};
+                                            Pawn taken = (Pawn) manager.pieces[pawnIndex];
+                                            String rightMove = String.format("%s%d%s%d",GetColumn(tymCol),tymRow+2,GetColumn(tymCol),tymRow);
+                                            if(taken.startingColumn.equals(GetColumn(tymCol)) && taken.move == 2 && right.movesHistory.getLast().equals(rightMove)) {
+                                                now = manager.Move("Pawn", now);
+                                                manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                                manager.pieces[pawnIndex] = new PlaceHolder();
+                                                JLabel tym = (JLabel) boardSquares.getComponent(pawnIndex).getComponentAt(1, 1);
+                                                tym = manager.Move("PlaceHolder", tym);
+                                                move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                                manager.turn = !manager.turn;
+                                            }
+                                        }
+                                        if(nowRow==7 && previousRow == 6){
+                                            JPopupMenu menuNow = (JPopupMenu) nowSquare.getComponent(0);
+                                            menuNow.setPopupSize(100,400);
+                                            menuNow.show(nowSquare,0,0);
+                                        }
+                                        //System.out.println("Vector: " + vector[0] + " " + vector[1]);System.out.println("Jestem: " + manager.pieces[indexNow].color + " drugi " + manager.pieces[indexPrevious].color + " tymczas: " + tymczas.color + " now " + nowPiece.color);
+                                        if (vector[0] != 0 && vector[1] == 0 && (len==1 || (tymczas.move == 1 && len==2)) && !manager.CheckObstacle(indexPrevious, vector, len+1)) {
                                             now = manager.Move("Pawn", now);
+                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
                                             tymczas.move +=1;
+                                        } else if (Diagonal(vector) && len < 2 && !Objects.equals(nowPiece.name, "EPlaceHolder") && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
+                                            if (manager.CheckObstacle(indexPrevious, vector, 2)) {
+                                                now = manager.Move("Pawn", now);
+                                                tymczas.move +=1;
+                                            }
+                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
                                         }
-                                        move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
-                                    }
-                                    break;
-                                default:
+                                        break;
+                                    default:
+                                }
                             }
                             right.ShowTurn(manager.turn);
                             right.AddToHistory(move);
@@ -423,128 +427,130 @@ public class Board {
                             }
                             if(allowedMoves.isEmpty()&&check.getFirst()[0]==1){
                                 //implementacja końca gry
-                                right.ShowWinner("Black");
+                                right.ShowWinner("White");
                                 TheEnd = true;
                             }
-                            if(allowedMoves.isEmpty() || warunek)
-                            switch (manager.previous.getName()){
-                                case "King":
-                                    int c;
-                                    if(vector[1]>0) {
-                                        c = 2;
-                                    }
-                                    else c = -1;
-                                    int rookIndex=indexPrevious+vector[1]+c;
-                                    //System.out.format("King %b, %b, %b, %b, %b " , tymczas.firstMove , abs(vector[1])==2, manager.pieces[rookIndex].name=="Rook",  manager.pieces[ rookIndex].firstMove, !CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious));
-
-                                    if(tymczas.move == 1 && abs(vector[1])==2 && manager.pieces[rookIndex].name=="Rook" && manager.pieces[rookIndex].move == 1 && !manager.CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious)){
-                                        boolean throughChecks = false;
-                                        for (int i=0;i<2;i++){
-                                            List<int[]> temp = manager.CheckCheck(indexNow-(vector[1]/abs(vector[1])*i),"Black");
-                                            if(temp.getFirst()[0]==1) throughChecks=true;
+                            if(allowedMoves.isEmpty() || warunek && !TheEnd) {
+                                switch (manager.previous.getName()){
+                                    case "King":
+                                        int c;
+                                        if(vector[1]>0) {
+                                            c = 2;
                                         }
-                                        if(!throughChecks)
-                                        {
-                                            now = manager.Move("King", now);
-                                            manager.UpdatePieces(indexPrevious, indexNow, tymczas);
-                                            System.out.println("roszada");
-                                            //System.out.println("Panel components");
-                                            for (int i = 0; i < ((JPanel) boardSquares.getComponent(indexNow - vector[1] / abs(vector[1]))).getComponentCount(); i++) {
-                                                System.out.println(((JPanel) boardSquares.getComponent(indexNow - vector[1] / abs(vector[1]))).getComponent(i));
+                                        else c = -1;
+                                        int rookIndex=indexPrevious+vector[1]+c;
+                                        //System.out.format("King %b, %b, %b, %b, %b " , tymczas.firstMove , abs(vector[1])==2, manager.pieces[rookIndex].name=="Rook",  manager.pieces[ rookIndex].firstMove, !CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious));
+
+                                        if(tymczas.move == 1 && abs(vector[1])==2 && manager.pieces[rookIndex].name.equals("Rook") && manager.pieces[rookIndex].move == 1 && !manager.CheckObstacle(indexPrevious,new int[]{vector[0],rookIndex-indexPrevious},rookIndex-indexPrevious)){
+                                            int afterMoveRoomIndex =indexNow-vector[1]/abs(vector[1]);
+                                            boolean throughChecks = false;
+                                            for (int i=0;i<2;i++){
+                                                List<int[]> temp = manager.CheckCheck(indexNow-(vector[1]/abs(vector[1])*i),"Black");
+                                                if(temp.getFirst()[0]==1) throughChecks=true;
                                             }
-                                            manager.previous = (JLabel) ((JPanel) boardSquares.getComponent(rookIndex)).getComponent(1);
-                                            now = (JLabel) ((JPanel) boardSquares.getComponent(indexNow - vector[1] / abs(vector[1]))).getComponent(1);
-                                            now = manager.Move("Rook", now);
-                                            manager.UpdatePieces(rookIndex, indexNow - vector[1] / abs(vector[1]), manager.pieces[rookIndex]);
-                                            manager.turn = !manager.turn;
-                                            move += "roszada";
-                                            blackKingPos = indexNow;
-                                            break;
+                                            if(!throughChecks)
+                                            {
+                                                now = manager.Move("King", now);
+                                                manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                                System.out.println("roszada");
+                                                //System.out.println("Panel components");
+                                                for (int i = 0; i < ((JPanel) boardSquares.getComponent(afterMoveRoomIndex)).getComponentCount(); i++) {
+                                                    System.out.println(((JPanel) boardSquares.getComponent(afterMoveRoomIndex)).getComponent(i));
+                                                }
+                                                manager.previous = (JLabel) ((JPanel) boardSquares.getComponent(rookIndex)).getComponent(1);
+                                                now = (JLabel) ((JPanel) boardSquares.getComponent(afterMoveRoomIndex)).getComponent(1);
+                                                now = manager.Move("Rook", now);
+                                                manager.UpdatePieces(rookIndex, afterMoveRoomIndex, manager.pieces[rookIndex]);
+                                                manager.turn = !manager.turn;
+                                                move += "roszada";
+                                                blackKingPos = indexNow;
+                                                break;
+                                            }
                                         }
-                                    }
-                                    if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color) && manager.CheckCheck(indexNow,"Black").getFirst()[0]==0){
-                                        now = manager.Move("King", now);
-                                        move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
-                                        blackKingPos=indexNow;
+                                        if(len<2 && (Diagonal(vector) || Strait(vector)) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color) && manager.CheckCheck(indexNow,"Black").getFirst()[0]==0){
+                                            now = manager.Move("King", now);
+                                            move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                            blackKingPos=indexNow;
 
-                                    }
-                                    break;
-                                case "Queen":
-                                    if(Diagonal(vector) || Strait(vector)){
-                                        if(!manager.CheckObstacle(indexPrevious,vector,   len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
-                                            now = manager.Move("Queen",now);
-                                            move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
                                         }
-                                    }
-                                    break;
-                                case "Bishop":
-                                    if(Diagonal(vector)){
-                                        if(!manager.CheckObstacle(indexPrevious,vector, len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
-                                            now = manager.Move("Bishop",now);
-                                            move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                        break;
+                                    case "Queen":
+                                        if(Diagonal(vector) || Strait(vector)){
+                                            if(!manager.CheckObstacle(indexPrevious,vector,   len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
+                                                now = manager.Move("Queen",now);
+                                                move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                            }
                                         }
-                                    }
-                                    break;
-                                case "Knight":
-                                    int[][] vectors = {{1,2},{1,-2},{-1,2},{-1,-2},{2,1},{2,-1},{-2,1},{-2,-1}};
-                                    for (int[] ints : vectors) {
-                                        if (vector[0] == ints[0] && vector[1] == ints[1] && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
-                                            now = manager.Move("Knight",now);
-                                            move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                        break;
+                                    case "Bishop":
+                                        if(Diagonal(vector)){
+                                            if(!manager.CheckObstacle(indexPrevious,vector, len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
+                                                now = manager.Move("Bishop",now);
+                                                move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                            }
                                         }
-                                    }
-                                    break;
-                                case "Rook":
-                                    if(Strait(vector)){
-                                        if(!manager.CheckObstacle(indexPrevious,vector,   len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
-                                            now = manager.Move("Rook",now);
-                                            move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                        break;
+                                    case "Knight":
+                                        int[][] vectors = {{1,2},{1,-2},{-1,2},{-1,-2},{2,1},{2,-1},{-2,1},{-2,-1}};
+                                        for (int[] ints : vectors) {
+                                            if (vector[0] == ints[0] && vector[1] == ints[1] && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
+                                                now = manager.Move("Knight",now);
+                                                move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                            }
                                         }
-                                    }
-                                    break;
-                                case "Pawn":
-                                    if(previousRow==3 && nowRow==2 && abs(nowColumn-previousColumn)==1){
-                                        System.out.println("Jestem");
-                                        int pawnIndex = indexNow+8;
-                                        int tymRow = indexNow / 8;
-                                        int tymCol = indexNow % 8;
-                                        vector = new int[]{tymRow-previousRow,tymCol-previousColumn};
-                                        Pawn taken = (Pawn) manager.pieces[pawnIndex];
-                                        String rightMove = String.format("%s%d%s%d",GetColumn(tymCol),tymRow,GetColumn(tymCol),tymRow+2);
-                                        System.out.println(taken.startingColumn == GetColumn(tymCol));
-                                        System.out.println(taken.move == 2);
-                                        System.out.println(right.movesHistory.getLast());
-                                        System.out.println(rightMove);
-                                        if(taken.startingColumn == GetColumn(tymCol) && taken.move == 2 && right.movesHistory.getLast().equals(rightMove)) {
-                                            now = manager.Move("Pawn", now);
-                                            manager.UpdatePieces(indexPrevious, indexNow, tymczas);
-                                            manager.pieces[pawnIndex] = new PlaceHolder();
-                                            JLabel tym = (JLabel) boardSquares.getComponent(pawnIndex).getComponentAt(1, 1);
-                                            tym = manager.Move("PlaceHolder", tym);
-                                            move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
-                                            manager.turn = !manager.turn;
+                                        break;
+                                    case "Rook":
+                                        if(Strait(vector)){
+                                            if(!manager.CheckObstacle(indexPrevious,vector,   len) && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)) {
+                                                now = manager.Move("Rook",now);
+                                                move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                            }
                                         }
-                                    }
-                                    if(nowRow==0 && previousRow == 1){
-                                        JPopupMenu menuNow = (JPopupMenu) nowSquare.getComponent(0);
-                                        menuNow.setPopupSize(100,400);
-                                        menuNow.show(nowSquare,0,0);
-                                    }
-                                    //System.out.println("Vector: " + vector[0] + " " + vector[1]);System.out.println("Jestem: " + manager.pieces[indexNow].color + " drugi " + manager.pieces[indexPrevious].color + " tymczas: " + tymczas.color + " now " + nowPiece.color);
-                                    if(vector[0]!=0&&vector[1]==0 && (len==1 || (tymczas.move == 1 && len==2)) && !manager.CheckObstacle(indexPrevious,vector,len+1)){
-                                        now = manager.Move("Pawn",now);
-                                        move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
-                                        tymczas.move += 1;
-                                    }
-                                    else if(Diagonal(vector) && len<2 && !Objects.equals(nowPiece.name, "PlaceHolder") && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
-                                        if(manager.CheckObstacle(indexPrevious,vector,2)){
+                                        break;
+                                    case "Pawn":
+                                        if(previousRow==3 && nowRow==2 && abs(nowColumn-previousColumn)==1){
+                                            System.out.println("Jestem");
+                                            int pawnIndex = indexNow+8;
+                                            int tymRow = indexNow / 8;
+                                            int tymCol = indexNow % 8;
+                                            vector = new int[]{tymRow-previousRow,tymCol-previousColumn};
+                                            Pawn taken = (Pawn) manager.pieces[pawnIndex];
+                                            String rightMove = String.format("%s%d%s%d",GetColumn(tymCol),tymRow,GetColumn(tymCol),tymRow+2);
+                                            System.out.println(taken.startingColumn.equals(GetColumn(tymCol)));
+                                            System.out.println(taken.move == 2);
+                                            System.out.println(right.movesHistory.getLast());
+                                            System.out.println(rightMove);
+                                            if(taken.startingColumn.equals(GetColumn(tymCol)) && taken.move == 2 && right.movesHistory.getLast().equals(rightMove)) {
+                                                now = manager.Move("Pawn", now);
+                                                manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                                manager.pieces[pawnIndex] = new PlaceHolder();
+                                                JLabel tym = (JLabel) boardSquares.getComponent(pawnIndex).getComponentAt(1, 1);
+                                                tym = manager.Move("PlaceHolder", tym);
+                                                move += manager.UpdatePieces(indexPrevious, indexNow, tymczas);
+                                                manager.turn = !manager.turn;
+                                            }
+                                        }
+                                        if(nowRow==0 && previousRow == 1){
+                                            JPopupMenu menuNow = (JPopupMenu) nowSquare.getComponent(0);
+                                            menuNow.setPopupSize(100,400);
+                                            menuNow.show(nowSquare,0,0);
+                                        }
+                                        //System.out.println("Vector: " + vector[0] + " " + vector[1]);System.out.println("Jestem: " + manager.pieces[indexNow].color + " drugi " + manager.pieces[indexPrevious].color + " tymczas: " + tymczas.color + " now " + nowPiece.color);
+                                        if(vector[0]!=0&&vector[1]==0 && (len==1 || (tymczas.move == 1 && len==2)) && !manager.CheckObstacle(indexPrevious,vector,len+1)){
                                             now = manager.Move("Pawn",now);
-                                            tymczas.move +=1;
+                                            move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                            tymczas.move += 1;
                                         }
-                                        move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
-                                    }
-                                    break;
-                                default:
+                                        else if(Diagonal(vector) && len<2 && !Objects.equals(nowPiece.name, "PlaceHolder") && !Objects.equals(manager.pieces[indexNow].color, tymczas.color)){
+                                            if(manager.CheckObstacle(indexPrevious,vector,2)){
+                                                now = manager.Move("Pawn",now);
+                                                tymczas.move +=1;
+                                            }
+                                            move += manager.UpdatePieces(indexPrevious,indexNow,tymczas);
+                                        }
+                                        break;
+                                    default:
+                                }
                             }
                             right.ShowTurn(manager.turn);
                             right.AddToHistory(move);

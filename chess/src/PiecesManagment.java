@@ -61,8 +61,10 @@ public class PiecesManagment  {
                     boolean isSameColor = pieces[indexNow].color.equals(color);
                     boolean isRookOrQueen = (pieces[indexNow].name.equals("Rook") || pieces[indexNow].name.equals("Queen"));
                     boolean isBishopOrQueen = pieces[indexNow].name.equals("Bishop") || pieces[indexNow].name.equals("Queen");
-                    boolean isWhitePawn;
-                    if(!isSameColor && ((j<=3 && isRookOrQueen)||(j>3 && ( isBishopOrQueen || ((pieces[indexNow].name.equals("Pawn") && (abs(indexNow-index)==7||abs(indexNow-index)==9)))))) ) {
+                    boolean isWhitePawn = pieces[indexNow].name.equals("Pawn") && pieces[indexNow].color.equals("White") && (indexNow-index==-7 || indexNow-index==-9);
+                    boolean isBlackPawn = pieces[indexNow].name.equals("Pawn") && pieces[indexNow].color.equals("Black") && (indexNow-index==7 || indexNow-index==9);
+
+                    if(!isSameColor && ((j<=3 && isRookOrQueen)||(j>3 && ( isBishopOrQueen || (isWhitePawn  || isBlackPawn))))) {
                         checks.add(new int[] {1,indexNow});
                         checks.remove(falseA);
                     }
@@ -157,13 +159,19 @@ public class PiecesManagment  {
                     }
                     if (!pieces[indexNow].name.equals("EPlaceHolder")) {
                         //System.out.println("Znaleziono przeszkode");
-                        if (
-                            pieces[kingIndex].color.equals(pieces[indexNow].color) && kingIndex != indexNow &&
-                            ((j <= 3 && (pieces[indexNow].name.equals("Rook") || pieces[indexNow].name.equals("Queen"))
-                            ) ||
-                            (j > 3 && (pieces[indexNow].name.equals("Bishop") || pieces[indexNow].name.equals("Queen") || (pieces[indexNow].name.equals("Pawn") && (abs(indexNow-checkingPieceIndex)%7==0||abs(indexNow-checkingPieceIndex)%9==0)))
-                            ))
-                            ){
+                        boolean isSameColor = pieces[kingIndex].color.equals(pieces[indexNow].color);
+                        boolean isSameIndex = kingIndex == indexNow;
+                        boolean isStraightDirection = j <= 3;
+                        boolean isDiagonalDirection = j > 3;
+
+                        boolean isRookOrQueen = pieces[indexNow].name.equals("Rook") || pieces[indexNow].name.equals("Queen");
+                        boolean isBishopOrQueen = pieces[indexNow].name.equals("Bishop") || pieces[indexNow].name.equals("Queen");
+
+                        boolean isWhitePawn = pieces[indexNow].name.equals("Pawn") && pieces[indexNow].color.equals("White") && (indexNow-checkingPieceIndex==-7 || indexNow-checkingPieceIndex==-9);
+                        boolean isBlackPawn = pieces[indexNow].name.equals("Pawn") && pieces[indexNow].color.equals("Black") && (indexNow-checkingPieceIndex==7 || indexNow-checkingPieceIndex==9);
+                        boolean isValidStraightPiece = isStraightDirection && isRookOrQueen;
+                        boolean isValidDiagonalPiece = isDiagonalDirection && isBishopOrQueen;
+                        if (isSameColor && !isSameIndex && (isValidStraightPiece || ( isValidDiagonalPiece || (isWhitePawn  || isBlackPawn)))){
                             possibleMoves.add(new int[]{checkingPieceIndex, indexNow});
                         }
                         break;
@@ -196,7 +204,7 @@ public class PiecesManagment  {
                         //System.out.println("Znaleziono przeszkode");
                         // w tym ifie jest błąd
                         boolean isSameColor = pieces[kingIndex].color.equals(pieces[indexNow].color);
-                        boolean isNotSameIndex = kingIndex != indexNow;
+                        boolean isSameIndex = kingIndex == indexNow;
                         boolean isStraightDirection = j <= 3;
                         boolean isDiagonalDirection = j > 3;
 
@@ -210,7 +218,7 @@ public class PiecesManagment  {
                         boolean isValidStraightPiece = isStraightDirection && (isRookOrQueen || isPawnAttackingDiagonally);
                         boolean isValidDiagonalPiece = isDiagonalDirection && isBishopOrQueen;
 
-                        if(isSameColor && isNotSameIndex && (isValidDiagonalPiece || isValidStraightPiece)){
+                        if(isSameColor && !isSameIndex && (isValidDiagonalPiece || isValidStraightPiece)){
                             possibleMoves.add(new int[]{tymIndex,indexNow});
                         }
                         break;

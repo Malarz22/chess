@@ -13,15 +13,20 @@ public class RightPanel extends JPanel {
     BoxLayout boxLayout = new BoxLayout(historyPanel, BoxLayout.Y_AXIS);
     JLabel turnLabel = new JLabel();
     List<String> movesHistory = new ArrayList<String>();
-    RightPanel(Board b, JPanel boardPanel){
+    RightPanel(Board b){
         historyPanel.setLayout(boxLayout);
         JPanel buttonContainer = new JPanel();
         nowaGra.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Clicked");
+                System.out.println("Nowa gra");
                 b.SetUpBoard();
-                boardPanel.updateUI();
+                b.boardSquares.revalidate();
+                b.boardSquares.repaint();
+                historyPanel.removeAll();
+                historyPanel.repaint();
+                historyPanel.revalidate();
+                HistoryPanelSetUp();
             }
         });
         this.setLayout(null); // Wyłączenie menedżera układu w panelu
@@ -31,6 +36,9 @@ public class RightPanel extends JPanel {
 
         buttonContainer.setBackground(Color.YELLOW);
         this.add(buttonContainer);
+        HistoryPanelSetUp();
+    }
+    public void HistoryPanelSetUp(){
         historyPanel.setBounds(700+560/2-200/4,100,200,400);
         historyPanel.setOpaque(true);
         historyPanel.setBackground(Color.WHITE);
@@ -38,6 +46,7 @@ public class RightPanel extends JPanel {
         text.setAlignmentX(0.5f);
         historyPanel.add(text);
         turnLabel.setAlignmentX(0.5f);
+        turnLabel.setText("");
         historyPanel.add(turnLabel);
         this.add(historyPanel);
     }
@@ -51,17 +60,27 @@ public class RightPanel extends JPanel {
     }
 
     public void ShowWinner(String color){
-        JLabel a =new JLabel("Winner is " + color);
+        JLabel a = new JLabel("Winner is " + color);
         a.setAlignmentX(0.5f);
         historyPanel.add(a);
     }
 
     public void AddToHistory(String move){
         movesHistory.add(move);
-        if(move.length()==0) return;
-        String beutifullMove = move.substring(0,2) + "         " + move.substring(move.length()-2);
-        JLabel a =new JLabel(beutifullMove);
+        if(move.isEmpty()) return;
+        String beautifulMove = move.substring(0,2) + "         " + move.substring(move.length()-2);
+        JLabel a =new JLabel(beautifulMove);
         a.setAlignmentX(0.5f);
         historyPanel.add(a);
     }
+
+    public boolean RuleOf50Moves(){
+        if(movesHistory.size()<50) return false;
+        for(int i = movesHistory.size()-1; i>movesHistory.size()-50;i--){
+            String move = movesHistory.get(i);
+            if(move.contains("x") || move.contains("P")) return false;
+        }
+        return true;
+    }
+
 }

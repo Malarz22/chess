@@ -16,6 +16,9 @@ public class PiecesManagment  {
 
 
     }
+    //prevent discovering check
+    // i need to check if after updating there is check if yes it isn't allowed
+
 
     public List<int[]> CheckCheck(int index){
         return CheckCheck(index,pieces[index].color);
@@ -240,6 +243,19 @@ public class PiecesManagment  {
         return possibleMoves;
     }
 
+    public boolean IsAllowedToMove(int kingIndex, int indexTo, int indexFrom){
+        Piece taken = pieces[indexTo];
+        pieces[indexTo] = pieces[indexFrom];
+        pieces[indexFrom] = new PlaceHolder();
+        java.util.List<int[]> check = CheckCheck(kingIndex);
+        pieces[indexFrom] = pieces[indexTo];
+        pieces[indexTo] = taken;
+        if(check.getFirst()[0]==1) {
+            return false;
+        }
+        return true;
+    }
+
     public JLabel Move(String name, JLabel now){
         ImageIcon piece = (ImageIcon) previous.getIcon();
         previous.setIcon(new ImageIcon("chess/pieces/placehHolder.png"));
@@ -258,9 +274,13 @@ public class PiecesManagment  {
 
 
     public String UpdatePieces(int index1, int index2, Piece a, Piece[] pieces1){
-        String move = board.GetCoordinates(index1);
-        move += board.GetCoordinates(index2);
+        String move = pieces1[index1].name.substring(0,1);
         pieces1[index1] = new PlaceHolder();
+        if(!pieces1[index2].name.equals("EPlaceHolder")){
+            move+="x";
+        }
+        move += board.GetCoordinates(index1);
+        move += board.GetCoordinates(index2);
         pieces1[index2] = a;
         return move;
     }

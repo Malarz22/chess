@@ -11,7 +11,6 @@ public abstract class Piece {
     String name;
     int points;
     int move;
-
     //boolean firstMove=true;
     // Visualization of the possibilities array:
     //int[][] possibilities = new int[8][8];
@@ -119,7 +118,6 @@ public abstract class Piece {
     public String toString(){
         return "To jest figura: " + name + " jest koloru: " + color + " jest warta punktów: " + points;
     }
-
 
     public abstract void Move();
 }
